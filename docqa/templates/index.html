@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline RAG • Surya + Ollama</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <style>
+    .chat-scroll { max-height: 70vh; overflow-y: auto; }
+  </style>
+</head>
+<body class="bg-gray-950 text-gray-200">
+  <div class="max-w-7xl mx-auto p-6">
+    <div class="flex justify-between items-center mb-8">
+      <h1 class="text-4xl font-bold flex items-center gap-3">
+        <i class="fa-solid fa-robot text-indigo-500"></i>
+        Document Intelligence System
+      </h1>
+      <div class="text-sm text-gray-400">Surya OCR • ChromaDB • Qwen3:8B • Marathi Ready</div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Upload Panel -->
+      <div id="upload-panel" class="lg:col-span-1 bg-gray-900 rounded-3xl p-8">
+        <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+          <i class="fa-solid fa-cloud-upload"></i> Upload Document
+        </h2>
+        <div id="dropzone"
+             class="border-2 border-dashed border-indigo-500 rounded-3xl h-96 flex flex-col items-center justify-center text-center hover:border-indigo-400 transition cursor-pointer">
+          <i class="fa-solid fa-file-pdf text-6xl text-indigo-500 mb-4"></i>
+          <p class="text-xl font-medium">Drop PDF or Image here</p>
+          <p class="text-gray-400 mt-2">or</p>
+          <label class="mt-4 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-2xl cursor-pointer">
+            Browse Files
+            <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png" class="hidden">
+          </label>
+          <p class="text-xs text-gray-500 mt-8">Supports Marathi + English • Up to 50+ pages</p>
+        </div>
+
+        <button onclick="startProcessing()" id="process-btn"
+                class="mt-6 w-full py-4 bg-emerald-600 hover:bg-emerald-700 rounded-3xl font-semibold text-lg flex items-center justify-center gap-3 disabled:opacity-50">
+          <i class="fa-solid fa-cogs"></i>
+          <span id="btn-text">Process with Surya OCR</span>
+        </button>
+      </div>
+
+      <!-- Chat Panel -->
+      <div class="lg:col-span-2 bg-gray-900 rounded-3xl p-8 flex flex-col h-[85vh]">
+        <div id="doc-info" class="hidden mb-4 text-emerald-400 font-medium flex items-center gap-2">
+          <i class="fa-solid fa-check-circle"></i>
+          <span id="current-doc"></span>
+        </div>
+
+        <div id="chat-messages" class="chat-scroll flex-1 space-y-6 pr-4"></div>
+
+        <div class="mt-auto pt-6 border-t border-gray-800">
+          <div class="flex gap-3">
+            <input id="user-input" type="text" placeholder="Ask anything about the document..."
+                   class="flex-1 bg-gray-800 rounded-3xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <button onclick="sendMessage()" class="px-8 bg-indigo-600 hover:bg-indigo-700 rounded-3xl">
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentFilename = '';
+
+    function initTailwind() {
+      tailwind.config = { content: ["*"], theme: { extend: {} } };
+    }
+
+    async function uploadFile(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      document.getElementById('btn-text').innerHTML = `
+        <i class="fa-solid fa-spinner animate-spin"></i> Processing OCR...
+      `;
+
+      const res = await fetch('/api/upload/', { method: 'POST', body: formData });
+      const data = await res.json();
+
+      if (data.status === 'success') {
+        currentFilename = data.filename;
+        document.getElementById('upload-panel').classList.add('opacity-50');
+        document.getElementById('doc-info').classList.remove('hidden');
+        document.getElementById('current-doc').innerHTML = `✅ <strong>${data.filename}</strong> processed`;
+        addMessage('ai', `Document loaded successfully! You can now ask me anything about <strong>${data.filename}</strong>.`);
+      } else {
+        alert('Error: ' + data.message);
+      }
+      document.getElementById('btn-text').innerHTML = `<i class="fa-solid fa-cogs"></i> Process with Surya OCR`;
+    }
+
+    function startProcessing() {
+      const input = document.getElementById('file-input');
+      if (input.files.length) uploadFile(input.files[0]);
+    }
+
+    function addMessage(sender, text) {
+      const chat = document.getElementById('chat-messages');
+      const bubble = document.createElement('div');
+      bubble.className = sender === 'user' 
+        ? 'flex justify-end' 
+        : 'flex justify-start';
+      
+      bubble.innerHTML = `
+        <div class="${sender === 'user' ? 'bg-indigo-600' : 'bg-gray-800'} max-w-[80%] rounded-3xl px-6 py-4">
+          ${text}
+        </div>
+      `;
+      chat.appendChild(bubble);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('user-input');
+      const query = input.value.trim();
+      if (!query || !currentFilename) return;
+
+      addMessage('user', query);
+      input.value = '';
+
+      const res = await fetch('/api/query/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
+      });
+      const data = await res.json();
+
+      addMessage('ai', data.response);
+    }
+
+    // Drag & Drop
+    const dropzone = document.getElementById('dropzone');
+    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('border-emerald-400'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('border-emerald-400'));
+    dropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropzone.classList.remove('border-emerald-400');
+      if (e.dataTransfer.files.length) uploadFile(e.dataTransfer.files[0]);
+    });
+
+    document.getElementById('file-input').addEventListener('change', e => {
+      if (e.target.files.length) uploadFile(e.target.files[0]);
+    });
+
+    initTailwind();
+  </script>
+</body>
+</html>
