@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CP Office • Chat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+</head>
+<body class="bg-gray-950 text-gray-200">
+  <nav class="bg-gray-900 border-b border-gray-800 px-6 py-4">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold flex items-center gap-3">
+        <i class="fa-solid fa-shield-halved text-blue-500"></i>
+        CP OFFICE - DOCQA
+      </h1>
+      <a href="/" class="flex items-center gap-2 hover:text-blue-400">
+        <i class="fa-solid fa-upload"></i> Upload New Document
+      </a>
+    </div>
+  </nav>
+
+  <div class="flex h-[calc(100vh-73px)] max-w-7xl mx-auto">
+    <!-- Sidebar: Documents -->
+    <div class="w-80 bg-gray-900 border-r border-gray-800 p-6 overflow-y-auto">
+      <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+        <i class="fa-solid fa-folder-open"></i> Saved Documents
+      </h2>
+      <div id="docs-sidebar" class="space-y-2"></div>
+    </div>
+
+    <!-- Main Chat Area -->
+    <div class="flex-1 flex flex-col">
+      <div id="chat-header" class="bg-gray-900 border-b border-gray-800 px-8 py-5 hidden">
+        <div class="flex items-center gap-3">
+          <i class="fa-solid fa-file-lines text-emerald-500"></i>
+          <span id="selected-doc-name" class="font-semibold text-lg"></span>
+        </div>
+      </div>
+
+      <div id="chat-messages" class="flex-1 p-8 overflow-y-auto space-y-6 chat-scroll"></div>
+
+      <div class="p-6 border-t border-gray-800 bg-gray-900">
+        <div class="flex gap-3">
+          <input id="user-input" type="text" placeholder="Ask anything about the selected document..."
+                 class="flex-1 bg-gray-800 rounded-3xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <button onclick="sendMessage()" class="px-10 bg-blue-600 hover:bg-blue-700 rounded-3xl">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+        <button onclick="clearChat()" class="text-xs text-gray-400 mt-3 hover:text-gray-300">
+          <i class="fa-solid fa-trash"></i> Clear Chat
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentDocument = null;
+    let chatHistory = [];
+
+    async function loadDocuments() {
+      const res = await fetch('/api/documents/');
+      const data = await res.json();
+      const container = document.getElementById('docs-sidebar');
+      container.innerHTML = data.documents.map(doc => `
+        <div onclick="selectDocument('${doc.original_filename}', '${doc.display_name}')" 
+             class="cursor-pointer p-4 rounded-2xl hover:bg-gray-800 flex items-center gap-3 ${currentDocument === doc.original_filename ? 'bg-blue-900' : ''}">
+          <i class="fa-solid fa-file-lines text-blue-400"></i>
+          <div class="flex-1">
+            <div class="font-medium">${doc.display_name}</div>
+            <div class="text-xs text-gray-400">${new Date(doc.upload_date).toLocaleDateString('en-IN')}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function selectDocument(originalName, displayName) {
+      currentDocument = originalName;
+      document.getElementById('chat-header').classList.remove('hidden');
+      document.getElementById('selected-doc-name').innerHTML = `<strong>${displayName}</strong>`;
+      chatHistory = [];
+      document.getElementById('chat-messages').innerHTML = '';
+      addMessage('ai', `✅ Connected to document: <strong>${displayName}</strong><br>You can now ask questions.`);
+      loadDocuments(); // refresh highlight
+    }
+
+    function addMessage(sender, text) {
+      const chat = document.getElementById('chat-messages');
+      const bubble = document.createElement('div');
+      bubble.className = sender === 'user' ? 'flex justify-end' : 'flex justify-start';
+      bubble.innerHTML = `
+        <div class="${sender === 'user' ? 'bg-blue-600' : 'bg-gray-800'} max-w-[75%] rounded-3xl px-6 py-4">
+          ${text}
+        </div>
+      `;
+      chat.appendChild(bubble);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('user-input');
+      const query = input.value.trim();
+      if (!query || !currentDocument) return;
+
+      addMessage('user', query);
+      chatHistory.push({ role: 'user', content: query });
+      input.value = '';
+
+      const res = await fetch('/api/query/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: query,
+          document_name: currentDocument,
+          history: chatHistory
+        })
+      });
+      const data = await res.json();
+      const answer = data.response;
+      addMessage('ai', answer);
+      chatHistory.push({ role: 'assistant', content: answer });
+    }
+
+    function clearChat() {
+      chatHistory = [];
+      document.getElementById('chat-messages').innerHTML = '';
+      if (currentDocument) {
+        addMessage('ai', `Chat cleared.<br>Still connected to <strong>${document.getElementById('selected-doc-name').innerText}</strong>`);
+      }
+    }
+
+    // Init
+    loadDocuments();
+  </script>
+</body>
+</html>
