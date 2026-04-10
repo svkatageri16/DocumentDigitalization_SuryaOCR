@@ -235,3 +235,64 @@ def delete_document(original_name: str):
     except Exception as e:
         print(f"[DELETE ERROR] {str(e)}")
         return False
+    
+
+# ====================== STREAMING QUERY (for real-time answer) ======================
+def process_query_stream(user_query: str, document_name: str, history: list = None):
+    """Generator function for streaming response"""
+    if not user_query.strip():
+        yield "Please ask a question."
+        return
+    if history is None:
+        history = []
+
+    embedder = get_embedder()
+    collection = get_chroma_collection()
+
+    try:
+        query_embedding = embedder.encode(user_query).tolist()
+        results = collection.query(
+            query_embeddings=[query_embedding],
+            n_results=5,
+            where={"source_file": document_name}
+        )
+
+        context = "\n\n".join(results.get('documents', [[]])[0]) if results.get('documents') else ""
+
+        if not context.strip():
+            yield "I could not find any relevant information in the selected document."
+            return
+
+        system_prompt = f"""You are a highly intelligent, multilingual assistant for CP Office, Pune.
+Answer the user's question based ONLY on the provided document context.
+If the answer is not present in the context, clearly say "I could not find this information in the document."
+Be professional, precise, and helpful. Answer in the same language as the query.
+
+DOCUMENT CONTEXT:
+{context}
+"""
+
+        messages = [{'role': 'system', 'content': system_prompt}]
+        messages.extend(history)
+        messages.append({'role': 'user', 'content': user_query})
+
+        # Streaming response from Ollama
+        stream = ollama.chat(
+            model='qwen3:8b',
+            messages=messages,
+            stream=True
+        )
+
+        full_response = ""
+        for chunk in stream:
+            content = chunk['message']['content']
+            full_response += content
+            yield content   # Stream each piece
+
+        # Save to history after streaming completes
+        history.append({'role': 'user', 'content': user_query})
+        history.append({'role': 'assistant', 'content': full_response})
+
+    except Exception as e:
+        print(f"[STREAM ERROR]: {str(e)}")
+        yield "Sorry, an error occurred while generating the response."

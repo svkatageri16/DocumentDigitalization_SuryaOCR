@@ -5,6 +5,8 @@ import os
 import json
 from .utils import process_uploaded_document, process_query, delete_document
 from .models import ProcessedDocument
+from django.http import StreamingHttpResponse
+import json
 
 # Global dict for progress (simple solution for development)
 processing_status = {}
@@ -72,16 +74,26 @@ def get_documents(request):
 @csrf_exempt
 def query_document(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        query = data.get('query', '')
-        document_name = data.get('document_name', '')
-        history = data.get('history', [])
+        try:
+            data = json.loads(request.body)
+            query = data.get('query', '')
+            document_name = data.get('document_name', '')
+            history = data.get('history', [])
 
-        if not document_name:
-            return JsonResponse({'status': 'error', 'response': 'Please select a document first.'})
+            if not document_name:
+                return JsonResponse({'status': 'error', 'response': 'Please select a document first.'})
 
-        response = process_query(query, document_name, history)
-        return JsonResponse({'status': 'success', 'response': response})
+            # Get streaming response from utils
+            from .utils import process_query_stream
+
+            def event_stream():
+                for chunk in process_query_stream(query, document_name, history):
+                    yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+
+            return StreamingHttpResponse(event_stream(), content_type='text/event-stream')
+
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'response': f"Error: {str(e)}"}, status=500)
 
     return JsonResponse({'status': 'error'}, status=400)
 
