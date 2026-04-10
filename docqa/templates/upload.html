@@ -6,7 +6,16 @@
   <title>CP Office • Document Upload</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-  <style> .chat-scroll { max-height: 70vh; overflow-y: auto; } </style>
+  <style>
+    .chat-scroll { 
+      max-height: 70vh; 
+      overflow-y: auto; 
+    }
+    .dropzone-active {
+      border-color: #10b981 !important;
+      background-color: rgba(16, 185, 129, 0.05);
+    }
+  </style>
 </head>
 <body class="bg-gray-950 text-gray-200">
   <nav class="bg-gray-900 border-b border-gray-800">
@@ -16,8 +25,12 @@
         CP OFFICE - DOCQA
       </h1>
       <div class="flex gap-8 text-sm">
-        <a href="/" class="flex items-center gap-2 hover:text-blue-400"><i class="fa-solid fa-upload"></i> Upload Document</a>
-        <a href="/chat/" class="flex items-center gap-2 hover:text-blue-400"><i class="fa-solid fa-comments"></i> Chat with Documents</a>
+        <a href="/" class="flex items-center gap-2 hover:text-blue-400 transition-colors">
+          <i class="fa-solid fa-upload"></i> Upload Document
+        </a>
+        <a href="/chat/" class="flex items-center gap-2 hover:text-blue-400 transition-colors">
+          <i class="fa-solid fa-comments"></i> Chat with Documents
+        </a>
       </div>
     </div>
   </nav>
@@ -27,18 +40,24 @@
       <!-- Upload Card -->
       <div class="bg-gray-900 rounded-3xl p-10">
         <h2 class="text-3xl font-semibold mb-6 flex items-center gap-3">
-          <i class="fa-solid fa-cloud-upload text-emerald-500"></i> Upload New Document
+          <i class="fa-solid fa-cloud-upload text-emerald-500"></i> 
+          Upload New Document
         </h2>
-        <div id="dropzone" class="border-4 border-dashed border-blue-500 rounded-3xl h-96 flex flex-col items-center justify-center hover:border-emerald-400 transition cursor-pointer">
+        
+        <div id="dropzone" 
+             class="border-4 border-dashed border-blue-500 rounded-3xl h-96 flex flex-col items-center justify-center hover:border-emerald-400 transition-all cursor-pointer">
           <i class="fa-solid fa-file-pdf text-7xl text-blue-500 mb-6"></i>
           <p class="text-2xl font-medium">Drop PDF or Image here</p>
           <p class="text-gray-400 mt-3">or</p>
-          <label class="mt-6 px-8 py-4 bg-blue-600 hover:bg-blue-700 rounded-2xl cursor-pointer text-lg">
+          <label class="mt-6 px-8 py-4 bg-blue-600 hover:bg-blue-700 rounded-2xl cursor-pointer text-lg transition-colors">
             Browse Files
             <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png" class="hidden">
           </label>
+          <p class="text-xs text-gray-500 mt-8">Supports PDF & Images • Marathi + English</p>
         </div>
-        <button onclick="startProcessing()" id="process-btn" class="mt-8 w-full py-5 bg-emerald-600 hover:bg-emerald-700 rounded-3xl font-bold text-xl flex items-center justify-center gap-3">
+
+        <button onclick="startProcessing()" id="process-btn"
+                class="mt-8 w-full py-5 bg-emerald-600 hover:bg-emerald-700 rounded-3xl font-bold text-xl flex items-center justify-center gap-3 transition-all disabled:opacity-70">
           <i class="fa-solid fa-cogs"></i>
           <span id="btn-text">Process with Surya OCR</span>
         </button>
@@ -46,54 +65,203 @@
 
       <!-- Processed Documents -->
       <div class="bg-gray-900 rounded-3xl p-8">
-        <h2 class="text-2xl font-semibold mb-6">Processed Documents</h2>
-        <div id="docs-list" class="space-y-3"></div>
+        <h2 class="text-2xl font-semibold mb-6 flex items-center gap-2">
+          <i class="fa-solid fa-list-check text-emerald-400"></i>
+          Processed Documents
+        </h2>
+        <div id="docs-list" class="space-y-3 max-h-[600px] overflow-y-auto pr-2"></div>
       </div>
     </div>
   </div>
 
   <script>
-    async function loadProcessedDocs() {
-      const res = await fetch('/api/documents/');
-      const data = await res.json();
-      const container = document.getElementById('docs-list');
-      container.innerHTML = data.documents.map(doc => `
-        <div class="flex justify-between items-center bg-gray-800 rounded-2xl p-4">
-          <div>
-            <i class="fa-solid fa-file-lines text-blue-400"></i>
-            <span class="ml-3 font-medium">${doc.display_name}</span>
-          </div>
-          <a href="/chat/" class="text-blue-400 hover:text-blue-300 text-sm font-medium">Chat →</a>
-        </div>
-      `).join('');
-    }
-    loadProcessedDocs();
+    let currentProcessingDoc = null;
 
-    // Upload logic (same as before, slightly cleaned)
+    // Load all processed documents
+    async function loadProcessedDocs() {
+      try {
+        const res = await fetch('/api/documents/');
+        const data = await res.json();
+        
+        const container = document.getElementById('docs-list');
+        
+        if (data.documents.length === 0) {
+          container.innerHTML = `
+            <div class="text-center py-12 text-gray-400">
+              <i class="fa-solid fa-folder-open text-4xl mb-3"></i>
+              <p>No documents processed yet</p>
+            </div>`;
+          return;
+        }
+
+        container.innerHTML = data.documents.map(doc => `
+          <div class="group flex justify-between items-center bg-gray-800 hover:bg-gray-700 rounded-2xl p-5 transition-all">
+            <div class="flex items-center gap-4">
+              <i class="fa-solid fa-file-lines text-blue-400 text-2xl"></i>
+              <div>
+                <div class="font-medium text-gray-100">${doc.display_name}</div>
+                <div class="text-xs text-gray-400">
+                  ${new Date(doc.upload_date).toLocaleDateString('en-IN')}
+                </div>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-5">
+              <a href="/chat/" 
+                 onclick="localStorage.setItem('selectedDoc','${doc.original_filename}');"
+                 class="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1">
+                <i class="fa-solid fa-comments"></i> Chat
+              </a>
+              <button onclick="deleteDoc('${doc.original_filename}', '${doc.display_name}')" 
+                      class="text-red-400 hover:text-red-500 p-2 rounded-xl hover:bg-gray-800 opacity-0 group-hover:opacity-100 transition-all">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error("Failed to load documents:", error);
+        document.getElementById('docs-list').innerHTML = `
+          <div class="text-red-400 p-4">Failed to load documents. Please refresh.</div>`;
+      }
+    }
+
+    // Delete document
+    async function deleteDoc(originalName, displayName) {
+      if (!confirm(`Are you sure you want to permanently delete "${displayName}"?\n\nThis action cannot be undone.`)) {
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/delete/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ original_name: originalName })
+        });
+        
+        const data = await res.json();
+
+        if (data.status === 'success') {
+          alert(data.message);
+          loadProcessedDocs();
+        } else {
+          alert('Error: ' + (data.message || 'Failed to delete'));
+        }
+      } catch (error) {
+        console.error("Delete failed:", error);
+        alert('Failed to delete document. Please try again.');
+      }
+    }
+
+    // ================== PROGRESS BAR ==================
+    function showProgress(docName) {
+      currentProcessingDoc = docName;
+      const btn = document.getElementById('process-btn');
+      btn.disabled = true;
+      
+      btn.innerHTML = `
+        <div class="w-full bg-gray-700 h-6 rounded-3xl overflow-hidden">
+          <div id="progress-bar" class="h-full bg-gradient-to-r from-blue-500 via-emerald-500 to-teal-500 w-0 transition-all duration-700"></div>
+        </div>
+        <div id="progress-text" class="text-center text-sm mt-4 text-gray-300 font-medium">
+          Initializing Surya OCR...
+        </div>
+      `;
+      pollProgress();
+    }
+
+    async function pollProgress() {
+      if (!currentProcessingDoc) return;
+
+      try {
+        const res = await fetch(`/api/progress/?doc_name=${encodeURIComponent(currentProcessingDoc)}`);
+        const status = await res.json();
+
+        const bar = document.getElementById('progress-bar');
+        const textEl = document.getElementById('progress-text');
+
+        if (bar) bar.style.width = `${status.progress}%`;
+        if (textEl) textEl.textContent = status.message || 'Processing...';
+
+        if (status.progress < 100) {
+          setTimeout(pollProgress, 700);
+        } else {
+          // Reset button after completion
+          setTimeout(() => {
+            const btn = document.getElementById('process-btn');
+            btn.innerHTML = `
+              <i class="fa-solid fa-cogs"></i>
+              <span>Process with Surya OCR</span>
+            `;
+            btn.disabled = false;
+            loadProcessedDocs();
+            currentProcessingDoc = null;
+          }, 1500);
+        }
+      } catch (e) {
+        console.error("Progress polling error:", e);
+      }
+    }
+
+    // Upload file
     async function uploadFile(file) {
       const formData = new FormData();
       formData.append('file', file);
-      document.getElementById('btn-text').innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Processing...`;
-      const res = await fetch('/api/upload/', { method: 'POST', body: formData });
-      const data = await res.json();
-      if (data.status === 'success') {
-        alert(`✅ ${data.filename} processed successfully!`);
-        loadProcessedDocs();
-      } else {
-        alert(data.message);
+      
+      const originalName = file.name.replace(/\.[^/.]+$/, "");
+      showProgress(originalName);
+
+      try {
+        const res = await fetch('/api/upload/', { 
+          method: 'POST', 
+          body: formData 
+        });
+        const data = await res.json();
+
+        if (data.status !== 'success') {
+          alert('Error: ' + (data.message || 'Upload failed'));
+        }
+      } catch (error) {
+        console.error("Upload error:", error);
+        alert('Upload failed. Please try again.');
       }
-      document.getElementById('btn-text').innerHTML = `<i class="fa-solid fa-cogs"></i> Process with Surya OCR`;
     }
+
     function startProcessing() {
       const input = document.getElementById('file-input');
-      if (input.files.length) uploadFile(input.files[0]);
+      if (input.files.length) {
+        uploadFile(input.files[0]);
+      }
     }
-    // Drag & Drop + click (same as your old code)
+
+    // Drag & Drop handlers
     const dropzone = document.getElementById('dropzone');
-    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('border-emerald-400'); });
-    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('border-emerald-400'));
-    dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('border-emerald-400'); if (e.dataTransfer.files.length) uploadFile(e.dataTransfer.files[0]); });
-    document.getElementById('file-input').addEventListener('change', e => { if (e.target.files.length) uploadFile(e.target.files[0]); });
+    
+    dropzone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropzone.classList.add('dropzone-active');
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('dropzone-active');
+    });
+
+    dropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropzone.classList.remove('dropzone-active');
+      if (e.dataTransfer.files.length) {
+        uploadFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    document.getElementById('file-input').addEventListener('change', e => {
+      if (e.target.files.length) {
+        uploadFile(e.target.files[0]);
+      }
+    });
+
+    // Initialize page
+    loadProcessedDocs();
   </script>
 </body>
 </html>

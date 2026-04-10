@@ -6,6 +6,21 @@
   <title>CP Office • Chat</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <style>
+    .chat-scroll { 
+      max-height: 70vh; 
+      overflow-y: auto; 
+      scrollbar-width: thin;
+      scrollbar-color: #4b5563 #1f2937;
+    }
+    .chat-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+    .chat-scroll::-webkit-scrollbar-thumb {
+      background-color: #4b5563;
+      border-radius: 20px;
+    }
+  </style>
 </head>
 <body class="bg-gray-950 text-gray-200">
   <nav class="bg-gray-900 border-b border-gray-800 px-6 py-4">
@@ -14,8 +29,9 @@
         <i class="fa-solid fa-shield-halved text-blue-500"></i>
         CP OFFICE - DOCQA
       </h1>
-      <a href="/" class="flex items-center gap-2 hover:text-blue-400">
-        <i class="fa-solid fa-upload"></i> Upload New Document
+      <a href="/" class="flex items-center gap-2 hover:text-blue-400 transition-colors">
+        <i class="fa-solid fa-upload"></i> 
+        <span>Upload New Document</span>
       </a>
     </div>
   </nav>
@@ -24,7 +40,8 @@
     <!-- Sidebar: Documents -->
     <div class="w-80 bg-gray-900 border-r border-gray-800 p-6 overflow-y-auto">
       <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
-        <i class="fa-solid fa-folder-open"></i> Saved Documents
+        <i class="fa-solid fa-folder-open text-blue-400"></i> 
+        Saved Documents
       </h2>
       <div id="docs-sidebar" class="space-y-2"></div>
     </div>
@@ -42,14 +59,20 @@
 
       <div class="p-6 border-t border-gray-800 bg-gray-900">
         <div class="flex gap-3">
-          <input id="user-input" type="text" placeholder="Ask anything about the selected document..."
-                 class="flex-1 bg-gray-800 rounded-3xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <button onclick="sendMessage()" class="px-10 bg-blue-600 hover:bg-blue-700 rounded-3xl">
+          <input id="user-input" 
+                 type="text" 
+                 placeholder="Ask anything about the selected document..."
+                 class="flex-1 bg-gray-800 rounded-3xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                 onkeypress="if(event.key === 'Enter') sendMessage()">
+          <button onclick="sendMessage()" 
+                  class="px-10 bg-blue-600 hover:bg-blue-700 rounded-3xl transition-colors">
             <i class="fa-solid fa-paper-plane"></i>
           </button>
         </div>
-        <button onclick="clearChat()" class="text-xs text-gray-400 mt-3 hover:text-gray-300">
-          <i class="fa-solid fa-trash"></i> Clear Chat
+        <button onclick="clearChat()" 
+                class="text-xs text-gray-400 mt-4 hover:text-gray-300 flex items-center gap-1 transition-colors">
+          <i class="fa-solid fa-trash"></i> 
+          Clear Chat
         </button>
       </div>
     </div>
@@ -60,40 +83,72 @@
     let chatHistory = [];
 
     async function loadDocuments() {
-      const res = await fetch('/api/documents/');
-      const data = await res.json();
-      const container = document.getElementById('docs-sidebar');
-      container.innerHTML = data.documents.map(doc => `
-        <div onclick="selectDocument('${doc.original_filename}', '${doc.display_name}')" 
-             class="cursor-pointer p-4 rounded-2xl hover:bg-gray-800 flex items-center gap-3 ${currentDocument === doc.original_filename ? 'bg-blue-900' : ''}">
-          <i class="fa-solid fa-file-lines text-blue-400"></i>
-          <div class="flex-1">
-            <div class="font-medium">${doc.display_name}</div>
-            <div class="text-xs text-gray-400">${new Date(doc.upload_date).toLocaleDateString('en-IN')}</div>
+      try {
+        const res = await fetch('/api/documents/');
+        const data = await res.json();
+        
+        const container = document.getElementById('docs-sidebar');
+        container.innerHTML = data.documents.map(doc => `
+          <div onclick="selectDocument('${doc.original_filename}', '${doc.display_name}')" 
+               class="group cursor-pointer p-4 rounded-2xl hover:bg-gray-800 flex items-center gap-3 transition-all ${currentDocument === doc.original_filename ? 'bg-blue-900 ring-1 ring-blue-500' : ''}">
+            
+            <i class="fa-solid fa-file-lines text-blue-400"></i>
+            
+            <div class="flex-1 min-w-0">
+              <div class="font-medium text-gray-100 truncate">${doc.display_name}</div>
+              <div class="text-xs text-gray-400">
+                ${new Date(doc.upload_date).toLocaleDateString('en-IN')}
+              </div>
+            </div>
+
+            <!-- Delete Button -->
+            <button onclick="event.stopImmediatePropagation(); deleteDoc('${doc.original_filename}', '${doc.display_name}');" 
+                    class="text-red-400 hover:text-red-500 p-2 rounded-xl hover:bg-gray-700 opacity-0 group-hover:opacity-100 transition-all">
+              <i class="fa-solid fa-trash"></i>
+            </button>
           </div>
-        </div>
-      `).join('');
+        `).join('');
+      } catch (error) {
+        console.error("Failed to load documents:", error);
+        document.getElementById('docs-sidebar').innerHTML = `
+          <div class="p-4 text-red-400 text-sm">Failed to load documents</div>
+        `;
+      }
     }
 
     function selectDocument(originalName, displayName) {
       currentDocument = originalName;
+      
+      // Update header
       document.getElementById('chat-header').classList.remove('hidden');
-      document.getElementById('selected-doc-name').innerHTML = `<strong>${displayName}</strong>`;
+      document.getElementById('selected-doc-name').innerHTML = `
+        <strong>${displayName}</strong>
+      `;
+
+      // Reset chat
       chatHistory = [];
       document.getElementById('chat-messages').innerHTML = '';
-      addMessage('ai', `✅ Connected to document: <strong>${displayName}</strong><br>You can now ask questions.`);
-      loadDocuments(); // refresh highlight
+      
+      addMessage('ai', `✅ Connected to document: <strong>${displayName}</strong><br>You can now ask questions about this document.`);
+
+      // Refresh sidebar to show active selection
+      loadDocuments();
     }
 
     function addMessage(sender, text) {
       const chat = document.getElementById('chat-messages');
       const bubble = document.createElement('div');
-      bubble.className = sender === 'user' ? 'flex justify-end' : 'flex justify-start';
+      
+      bubble.className = sender === 'user' 
+        ? 'flex justify-end' 
+        : 'flex justify-start';
+      
       bubble.innerHTML = `
-        <div class="${sender === 'user' ? 'bg-blue-600' : 'bg-gray-800'} max-w-[75%] rounded-3xl px-6 py-4">
+        <div class="${sender === 'user' ? 'bg-blue-600' : 'bg-gray-800'} max-w-[75%] rounded-3xl px-6 py-4 leading-relaxed">
           ${text}
         </div>
       `;
+      
       chat.appendChild(bubble);
       chat.scrollTop = chat.scrollHeight;
     }
@@ -101,37 +156,94 @@
     async function sendMessage() {
       const input = document.getElementById('user-input');
       const query = input.value.trim();
-      if (!query || !currentDocument) return;
+      
+      if (!query || !currentDocument) {
+        if (!currentDocument) {
+          alert("Please select a document first from the sidebar.");
+        }
+        return;
+      }
 
       addMessage('user', query);
       chatHistory.push({ role: 'user', content: query });
       input.value = '';
 
-      const res = await fetch('/api/query/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: query,
-          document_name: currentDocument,
-          history: chatHistory
-        })
-      });
-      const data = await res.json();
-      const answer = data.response;
-      addMessage('ai', answer);
-      chatHistory.push({ role: 'assistant', content: answer });
-    }
-
-    function clearChat() {
-      chatHistory = [];
-      document.getElementById('chat-messages').innerHTML = '';
-      if (currentDocument) {
-        addMessage('ai', `Chat cleared.<br>Still connected to <strong>${document.getElementById('selected-doc-name').innerText}</strong>`);
+      try {
+        const res = await fetch('/api/query/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            query: query,
+            document_name: currentDocument,
+            history: chatHistory
+          })
+        });
+        
+        const data = await res.json();
+        const answer = data.response || "Sorry, I couldn't generate a response.";
+        
+        addMessage('ai', answer);
+        chatHistory.push({ role: 'assistant', content: answer });
+      } catch (error) {
+        console.error("Query error:", error);
+        addMessage('ai', "❌ Error communicating with the server. Please try again.");
       }
     }
 
-    // Init
+    async function deleteDoc(originalName, displayName) {
+      if (!confirm(`Are you sure you want to permanently delete "${displayName}"?\n\nThis action cannot be undone.`)) {
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/delete/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ original_name: originalName })
+        });
+        
+        const data = await res.json();
+
+        if (data.status === 'success') {
+          alert(data.message);
+          
+          // If the deleted document was currently selected, clear the chat
+          if (currentDocument === originalName) {
+            currentDocument = null;
+            document.getElementById('chat-header').classList.add('hidden');
+            document.getElementById('chat-messages').innerHTML = '';
+            addMessage('ai', 'Document deleted. Please select another document to continue.');
+          }
+          
+          // Refresh document list
+          loadDocuments();
+        } else {
+          alert('Error: ' + (data.message || 'Failed to delete document'));
+        }
+      } catch (error) {
+        console.error("Delete error:", error);
+        alert('Failed to delete document. Please try again.');
+      }
+    }
+
+    function clearChat() {
+      if (!currentDocument) return;
+      
+      chatHistory = [];
+      document.getElementById('chat-messages').innerHTML = '';
+      
+      addMessage('ai', `Chat history cleared.<br>Still connected to <strong>${document.getElementById('selected-doc-name').innerText}</strong>`);
+    }
+
+    // Initialize
     loadDocuments();
+
+    // Optional: Allow pressing Enter to send message
+    document.getElementById('user-input').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
   </script>
 </body>
 </html>
