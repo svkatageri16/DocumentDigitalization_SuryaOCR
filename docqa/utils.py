@@ -11,6 +11,13 @@ from surya.foundation import FoundationPredictor
 from surya.recognition import RecognitionPredictor
 from surya.detection import DetectionPredictor
 
+import torch
+if torch.cuda.is_available():
+    torch.cuda.set_device(0)  # Use first GPU
+    print(f"Using GPU: {torch.cuda.get_device_name(0)}")
+else:
+    print("WARNING: No GPU detected - running on CPU (very slow)")
+
 CHROMA_PATH = "./chroma_storage"
 EXTRACTED_DIR = "./extracted_documents"
 CHROMA_COLLECTION_NAME = "cp_permanent_docs"
@@ -38,6 +45,10 @@ def update_progress(doc_name: str, progress: int, message: str):
     """Update progress for real-time progress bar"""
     processing_status[doc_name] = {'progress': progress, 'message': message}
     print(f"[PROGRESS] {doc_name}: {progress}% - {message}")
+
+import os
+os.environ["RECOGNITION_BATCH_SIZE"] = "64"   # Try 32 or 128 depending on your VRAM
+# For very strong GPU (12GB+), you can go up to 128-256
 
 # ====================== PHASE 1: OCR ======================
 def extract_and_purge(file_path: str, doc_name: str):
