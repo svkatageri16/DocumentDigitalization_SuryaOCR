@@ -6,16 +6,6 @@
   <title>CP Office • Chat</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-  <style>
-    .chat-scroll { 
-      max-height: 70vh; 
-      overflow-y: auto; 
-      scrollbar-width: thin;
-      scrollbar-color: #4b5563 #1f2937;
-    }
-    .chat-scroll::-webkit-scrollbar { width: 6px; }
-    .chat-scroll::-webkit-scrollbar-thumb { background-color: #4b5563; border-radius: 20px; }
-  </style>
 </head>
 <body class="bg-gray-950 text-gray-200">
   <nav class="bg-gray-900 border-b border-gray-800 px-6 py-4">
@@ -31,15 +21,15 @@
   </nav>
 
   <div class="flex h-[calc(100vh-73px)] max-w-7xl mx-auto">
-    <!-- Sidebar -->
+    <!-- Sidebar: Documents -->
     <div class="w-80 bg-gray-900 border-r border-gray-800 p-6 overflow-y-auto">
       <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
-        <i class="fa-solid fa-folder-open text-blue-400"></i> Saved Documents
+        <i class="fa-solid fa-folder-open"></i> Saved Documents
       </h2>
       <div id="docs-sidebar" class="space-y-2"></div>
     </div>
 
-    <!-- Chat Area -->
+    <!-- Main Chat Area -->
     <div class="flex-1 flex flex-col">
       <div id="chat-header" class="bg-gray-900 border-b border-gray-800 px-8 py-5 hidden">
         <div class="flex items-center gap-3">
@@ -52,16 +42,13 @@
 
       <div class="p-6 border-t border-gray-800 bg-gray-900">
         <div class="flex gap-3">
-          <input id="user-input" type="text" 
-                 placeholder="Ask anything about the selected document..."
-                 class="flex-1 bg-gray-800 rounded-3xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                 onkeypress="if(event.key === 'Enter') sendMessage()">
-          <button onclick="sendMessage()" 
-                  class="px-10 bg-blue-600 hover:bg-blue-700 rounded-3xl transition-colors">
+          <input id="user-input" type="text" placeholder="Ask anything about the selected document..."
+                 class="flex-1 bg-gray-800 rounded-3xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <button onclick="sendMessage()" class="px-10 bg-blue-600 hover:bg-blue-700 rounded-3xl">
             <i class="fa-solid fa-paper-plane"></i>
           </button>
         </div>
-        <button onclick="clearChat()" class="text-xs text-gray-400 mt-4 hover:text-gray-300">
+        <button onclick="clearChat()" class="text-xs text-gray-400 mt-3 hover:text-gray-300">
           <i class="fa-solid fa-trash"></i> Clear Chat
         </button>
       </div>
@@ -76,19 +63,14 @@
       const res = await fetch('/api/documents/');
       const data = await res.json();
       const container = document.getElementById('docs-sidebar');
-      
       container.innerHTML = data.documents.map(doc => `
-        <div onclick="selectDocument('${doc.original_filename}', '${doc.display_name}')" 
-             class="group cursor-pointer p-4 rounded-2xl hover:bg-gray-800 flex items-center gap-3 transition-all ${currentDocument === doc.original_filename ? 'bg-blue-900 ring-1 ring-blue-500' : ''}">
+        <div onclick="selectDocument('${doc.original_filename}', '${doc.display_name}')"
+             class="cursor-pointer p-4 rounded-2xl hover:bg-gray-800 flex items-center gap-3 ${currentDocument === doc.original_filename ? 'bg-blue-900' : ''}">
           <i class="fa-solid fa-file-lines text-blue-400"></i>
           <div class="flex-1">
             <div class="font-medium">${doc.display_name}</div>
             <div class="text-xs text-gray-400">${new Date(doc.upload_date).toLocaleDateString('en-IN')}</div>
           </div>
-          <button onclick="event.stopImmediatePropagation(); deleteDoc('${doc.original_filename}', '${doc.display_name}');" 
-                  class="text-red-400 hover:text-red-500 p-2 rounded-xl hover:bg-gray-700 opacity-0 group-hover:opacity-100">
-            <i class="fa-solid fa-trash"></i>
-          </button>
         </div>
       `).join('');
     }
@@ -99,15 +81,14 @@
       document.getElementById('selected-doc-name').innerHTML = `<strong>${displayName}</strong>`;
       chatHistory = [];
       document.getElementById('chat-messages').innerHTML = '';
-      addMessage('ai', `✅ Connected to document: <strong>${displayName}</strong>`);
-      loadDocuments();
+      addMessage('ai', `:white_check_mark: Connected to document: <strong>${displayName}</strong><br>You can now ask questions.`);
+      loadDocuments(); // refresh highlight
     }
 
     function addMessage(sender, text) {
       const chat = document.getElementById('chat-messages');
       const bubble = document.createElement('div');
       bubble.className = sender === 'user' ? 'flex justify-end' : 'flex justify-start';
-      
       bubble.innerHTML = `
         <div class="${sender === 'user' ? 'bg-blue-600' : 'bg-gray-800'} max-w-[75%] rounded-3xl px-6 py-4">
           ${text}
@@ -115,105 +96,30 @@
       `;
       chat.appendChild(bubble);
       chat.scrollTop = chat.scrollHeight;
-      return bubble;
     }
 
     async function sendMessage() {
       const input = document.getElementById('user-input');
       const query = input.value.trim();
-      if (!query || !currentDocument) {
-        if (!currentDocument) alert("Please select a document first.");
-        return;
-      }
+      if (!query || !currentDocument) return;
 
       addMessage('user', query);
       chatHistory.push({ role: 'user', content: query });
       input.value = '';
 
-      // Show thinking indicator
-      const thinkingDiv = document.createElement('div');
-      thinkingDiv.className = 'flex justify-start';
-      thinkingDiv.innerHTML = `
-        <div class="bg-gray-800 max-w-[75%] rounded-3xl px-6 py-4 flex items-center gap-3">
-          <i class="fa-solid fa-spinner fa-spin text-blue-400"></i>
-          <span class="text-gray-300">Thinking...</span>
-        </div>`;
-      document.getElementById('chat-messages').appendChild(thinkingDiv);
-      document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
-
-      let aiBubble = null;
-      let fullAnswer = "";
-
-      try {
-        const res = await fetch('/api/query/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            query: query,
-            document_name: currentDocument,
-            history: chatHistory
-          })
-        });
-
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-
-        // Remove thinking indicator
-        thinkingDiv.remove();
-
-        // Create AI bubble for streaming
-        aiBubble = addMessage('ai', '');
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value);
-          const lines = chunk.split('\n');
-
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              try {
-                const data = JSON.parse(line.slice(6));
-                if (data.chunk) {
-                  fullAnswer += data.chunk;
-                  // Update the last AI bubble with new text
-                  aiBubble.querySelector('div').innerHTML = fullAnswer;
-                  document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
-                }
-              } catch (e) {}
-            }
-          }
-        }
-
-        // Save to history after streaming completes
-        chatHistory.push({ role: 'assistant', content: fullAnswer });
-
-      } catch (error) {
-        console.error(error);
-        if (thinkingDiv) thinkingDiv.remove();
-        if (aiBubble) aiBubble.remove();
-        addMessage('ai', "❌ Error: Could not connect to AI.");
-      }
-    }
-
-    async function deleteDoc(originalName, displayName) {
-      if (!confirm(`Delete "${displayName}" permanently?`)) return;
-      const res = await fetch('/api/delete/', {
+      const res = await fetch('/api/query/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ original_name: originalName })
+        body: JSON.stringify({
+          query: query,
+          document_name: currentDocument,
+          history: chatHistory
+        })
       });
       const data = await res.json();
-      if (data.status === 'success') {
-        alert(data.message);
-        if (currentDocument === originalName) {
-          currentDocument = null;
-          document.getElementById('chat-header').classList.add('hidden');
-          document.getElementById('chat-messages').innerHTML = '';
-        }
-        loadDocuments();
-      }
+      const answer = data.response;
+      addMessage('ai', answer);
+      chatHistory.push({ role: 'assistant', content: answer });
     }
 
     function clearChat() {
@@ -224,7 +130,7 @@
       }
     }
 
-    // Initialize
+    // Init
     loadDocuments();
   </script>
 </body>

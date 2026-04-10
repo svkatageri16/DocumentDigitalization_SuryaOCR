@@ -3,13 +3,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import os
 import json
-from .utils import process_uploaded_document, process_query, delete_document
+from .utils import process_uploaded_document, process_query
 from .models import ProcessedDocument
-from django.http import StreamingHttpResponse
-import json
-
-# Global dict for progress (simple solution for development)
-processing_status = {}
 
 @csrf_exempt
 def upload_document(request):
@@ -19,24 +14,17 @@ def upload_document(request):
 
         uploaded_file = request.FILES['file']
         file_path = os.path.join('uploads', uploaded_file.name)
-        original_name = os.path.splitext(uploaded_file.name)[0]
-
-        # Initialize progress
-        processing_status[original_name] = {'progress': 5, 'message': 'Uploading file...'}
 
         with open(file_path, 'wb+') as destination:
             for chunk in uploaded_file.chunks():
                 destination.write(chunk)
 
         try:
-            processing_status[original_name] = {'progress': 20, 'message': 'Checking if document already exists...'}
-
             result = process_uploaded_document(file_path, uploaded_file.name)
-            
-            processing_status[original_name] = {'progress': 90, 'message': 'Finalizing storage...'}
-
             os.remove(file_path)
 
+            # Always ensure model entry exists
+            original_name = result.get('original_name') or os.path.splitext(uploaded_file.name)[0]
             ProcessedDocument.objects.get_or_create(
                 original_filename=original_name,
                 defaults={
@@ -45,17 +33,14 @@ def upload_document(request):
                 }
             )
 
-            processing_status[original_name] = {'progress': 100, 'message': 'Document processed successfully!'}
-
             return JsonResponse({
                 'status': 'success',
                 'message': result.get('message', 'Document processed successfully!'),
                 'filename': uploaded_file.name,
-                'preview': result.get('text_preview', ''),
+                'preview': result.get('text_preview', 'Ready for chat'),
                 'original_name': original_name
             })
         except Exception as e:
-            processing_status[original_name] = {'progress': 0, 'message': f'Error: {str(e)}'}
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
@@ -74,56 +59,17 @@ def get_documents(request):
 @csrf_exempt
 def query_document(request):
     if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            query = data.get('query', '')
-            document_name = data.get('document_name', '')
-            history = data.get('history', [])
-
-            if not document_name:
-                return JsonResponse({'status': 'error', 'response': 'Please select a document first.'})
-
-            # Get streaming response from utils
-            from .utils import process_query_stream
-
-            def event_stream():
-                for chunk in process_query_stream(query, document_name, history):
-                    yield f"data: {json.dumps({'chunk': chunk})}\n\n"
-
-            return StreamingHttpResponse(event_stream(), content_type='text/event-stream')
-
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'response': f"Error: {str(e)}"}, status=500)
-
-    return JsonResponse({'status': 'error'}, status=400)
-
-
-@csrf_exempt
-def delete_document_view(request):
-    if request.method == 'POST':
         data = json.loads(request.body)
-        original_name = data.get('original_name', '')
-        if not original_name:
-            return JsonResponse({'status': 'error', 'message': 'No document specified'}, status=400)
-        
-        success = delete_document(original_name)
-        if success:
-            # Clean progress if any
-            if original_name in processing_status:
-                del processing_status[original_name]
-            return JsonResponse({'status': 'success', 'message': f'Document "{original_name}" deleted successfully.'})
-        else:
-            return JsonResponse({'status': 'error', 'message': 'Failed to delete document.'}, status=500)
-    
-    return JsonResponse({'status': 'error'}, status=400)
+        query = data.get('query', '')
+        document_name = data.get('document_name', '')
+        history = data.get('history', [])
 
+        if not document_name:
+            return JsonResponse({'status': 'error', 'response': 'Please select a document first.'})
 
-@csrf_exempt
-def get_processing_status(request):
-    if request.method == 'GET':
-        doc_name = request.GET.get('doc_name', '')
-        status = processing_status.get(doc_name, {'progress': 0, 'message': 'Idle'})
-        return JsonResponse(status)
+        response = process_query(query, document_name, history)
+        return JsonResponse({'status': 'success', 'response': response})
+
     return JsonResponse({'status': 'error'}, status=400)
 
 
