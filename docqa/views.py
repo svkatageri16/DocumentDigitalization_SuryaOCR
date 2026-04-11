@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import os
 import json
-from .utils import process_uploaded_document, process_query
+from .utils import process_uploaded_document, process_query, delete_document_from_chroma
 from .models import ProcessedDocument
 
 @csrf_exempt
@@ -23,7 +23,6 @@ def upload_document(request):
             result = process_uploaded_document(file_path, uploaded_file.name)
             os.remove(file_path)
 
-            # Always ensure model entry exists
             original_name = result.get('original_name') or os.path.splitext(uploaded_file.name)[0]
             ProcessedDocument.objects.get_or_create(
                 original_filename=original_name,
@@ -34,16 +33,34 @@ def upload_document(request):
             )
 
             return JsonResponse({
-                'status': 'success',
+                'status': result['status'],
                 'message': result.get('message', 'Document processed successfully!'),
                 'filename': uploaded_file.name,
-                'preview': result.get('text_preview', 'Ready for chat'),
+                'preview': result.get('text_preview', ''),
                 'original_name': original_name
             })
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+
+@csrf_exempt
+def delete_document(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        original_name = data.get('original_filename')
+        if not original_name:
+            return JsonResponse({'status': 'error', 'message': 'No filename provided'}, status=400)
+
+        delete_document_from_chroma(original_name)
+        ProcessedDocument.objects.filter(original_filename=original_name).delete()
+
+        return JsonResponse({
+            'status': 'success',
+            'message': f'Document "{original_name}" deleted successfully.'
+        })
+    return JsonResponse({'status': 'error'}, status=400)
 
 
 @csrf_exempt
@@ -63,13 +80,10 @@ def query_document(request):
         query = data.get('query', '')
         document_name = data.get('document_name', '')
         history = data.get('history', [])
-
         if not document_name:
             return JsonResponse({'status': 'error', 'response': 'Please select a document first.'})
-
         response = process_query(query, document_name, history)
         return JsonResponse({'status': 'success', 'response': response})
-
     return JsonResponse({'status': 'error'}, status=400)
 
 

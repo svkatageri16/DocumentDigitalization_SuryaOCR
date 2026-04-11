@@ -31,9 +31,15 @@ def get_chroma_collection():
     chroma_client = chromadb.PersistentClient(path=CHROMA_PATH)
     return chroma_client.get_or_create_collection(name=CHROMA_COLLECTION_NAME)
 
-# ====================== PHASE 1: OCR ======================
+# ====================== DELETE DOCUMENT ======================
+def delete_document_from_chroma(original_name: str):
+    collection = get_chroma_collection()
+    collection.delete(where={"source_file": original_name})
+    print(f"🗑️ Deleted all chunks of '{original_name}' from ChromaDB")
+    return True
+
+# ====================== OCR EXTRACTION ======================
 def extract_and_purge(file_path: str):
-    # (Your original function - unchanged, only minor cleanup improvements)
     print("\n[1/5] Loading Surya OCR into GPU...")
     foundation_predictor = FoundationPredictor()
     recognition_predictor = RecognitionPredictor(foundation_predictor)
@@ -52,11 +58,13 @@ def extract_and_purge(file_path: str):
                 pix = page.get_pixmap(dpi=200)
                 img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
                 predictions = recognition_predictor([img], det_predictor=detection_predictor)
+
                 full_extracted_text += f"\n--- START OF PAGE {page_num + 1} ---\n\n"
                 for pred in predictions:
                     for line in pred.text_lines:
                         full_extracted_text += line.text + "\n"
                 full_extracted_text += f"\n--- END OF PAGE {page_num + 1} ---\n"
+
                 del img, pix, page, predictions
                 gc.collect()
                 if torch.cuda.is_available():
@@ -80,7 +88,6 @@ def extract_and_purge(file_path: str):
             torch.cuda.empty_cache()
             torch.cuda.synchronize()
 
-    # Save extracted text
     timestamp = int(time.time())
     output_filename = os.path.join(EXTRACTED_DIR, f"Extracted_{filename}_{timestamp}.txt")
     with open(output_filename, "w", encoding="utf-8") as f:
@@ -88,25 +95,22 @@ def extract_and_purge(file_path: str):
     print(f"[*] OCR completed → {output_filename}")
     return full_extracted_text.strip()
 
-# ====================== NEW: PROCESS UPLOAD (Skip if exists) ======================
+# ====================== PROCESS UPLOAD ======================
 def process_uploaded_document(file_path: str, uploaded_filename: str):
     original_name = os.path.splitext(uploaded_filename)[0]
     collection = get_chroma_collection()
 
-    # Check if document already exists
     existing = collection.get(where={"source_file": original_name})
     if existing and len(existing.get('ids', [])) > 0:
-        print(f"[SUCCESS] '{original_name}' already in database → skipping OCR")
+        print(f"[INFO] '{original_name}' already exists → skipping OCR")
         return {
             'status': 'exists',
             'original_name': original_name,
-            'message': 'Document already processed and available in database.'
+            'message': 'Document already processed.'
         }
 
-    # New document → run OCR
     text = extract_and_purge(file_path)
 
-    # Store permanently with metadata
     print("\n[5/5] Generating embeddings → Permanent ChromaDB")
     embedder = get_embedder()
     chunk_size = 400
@@ -116,7 +120,7 @@ def process_uploaded_document(file_path: str, uploaded_filename: str):
     metadatas = [{"source_file": original_name} for _ in range(len(chunks))]
 
     collection.add(documents=chunks, embeddings=embeddings, ids=ids, metadatas=metadatas)
-    print(f":white_check_mark: Stored {len(chunks)} chunks for {original_name}")
+    print(f"✅ Stored {len(chunks)} chunks for {original_name}")
 
     del embedder
     gc.collect()
@@ -129,10 +133,11 @@ def process_uploaded_document(file_path: str, uploaded_filename: str):
         'text_preview': text[:500] + '...' if len(text) > 500 else text
     }
 
-# ====================== NEW: QUERY WITH DOCUMENT FILTER + MEMORY ======================
+# ====================== PROCESS QUERY (Added back) ======================
 def process_query(user_query: str, document_name: str, history: list = None):
     if not user_query.strip():
         return "Please ask a question."
+
     if history is None:
         history = []
 
@@ -141,11 +146,13 @@ def process_query(user_query: str, document_name: str, history: list = None):
 
     try:
         query_embedding = embedder.encode(user_query).tolist()
+
         results = collection.query(
             query_embeddings=[query_embedding],
             n_results=5,
             where={"source_file": document_name}
         )
+
         context = "\n\n".join(results.get('documents', [[]])[0]) if results.get('documents') else ""
 
         if not context.strip():
@@ -165,13 +172,14 @@ DOCUMENT CONTEXT:
         messages.append({'role': 'user', 'content': user_query})
 
         response = ollama.chat(
-            model='qwen3:8b',
+            model='qwen2.5:7b',      # Recommended lighter model
             messages=messages
         )
+
         return response['message']['content']
 
     except Exception as e:
         print(f"[ERROR in process_query]: {str(e)}")
         import traceback
         traceback.print_exc()
-        return f"An error occurred: {str(e)}"
+        return f"An error occurred while processing your query: {str(e)}"
