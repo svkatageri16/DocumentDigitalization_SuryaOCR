@@ -13,6 +13,8 @@ from surya.detection import DetectionPredictor
 
 CHROMA_PATH = "./chroma_storage"
 EXTRACTED_DIR = "./extracted_documents"
+CHROMA_COLLECTION_NAME = "cp_permanent_docs"
+
 os.makedirs(EXTRACTED_DIR, exist_ok=True)
 os.makedirs("uploads", exist_ok=True)
 
@@ -25,13 +27,23 @@ def get_embedder():
         _embedder = SentenceTransformer("paraphrase-multilingual-mpnet-base-v2")
     return _embedder
 
-# ====================== PHASE 1: OCR ======================
+def get_chroma_collection():
+    chroma_client = chromadb.PersistentClient(path=CHROMA_PATH)
+    return chroma_client.get_or_create_collection(name=CHROMA_COLLECTION_NAME)
+
+# ====================== DELETE DOCUMENT ======================
+def delete_document_from_chroma(original_name: str):
+    collection = get_chroma_collection()
+    collection.delete(where={"source_file": original_name})
+    print(f"🗑️ Deleted all chunks of '{original_name}' from ChromaDB")
+    return True
+
+# ====================== OCR EXTRACTION ======================
 def extract_and_purge(file_path: str):
     print("\n[1/5] Loading Surya OCR into GPU...")
     foundation_predictor = FoundationPredictor()
     recognition_predictor = RecognitionPredictor(foundation_predictor)
     detection_predictor = DetectionPredictor()
-
     full_extracted_text = ""
     filename = os.path.basename(file_path)
 
@@ -39,15 +51,12 @@ def extract_and_purge(file_path: str):
         if file_path.lower().endswith('.pdf'):
             pdf_document = fitz.open(file_path)
             total_pages = len(pdf_document)
-            print(f"[2/5] Processing PDF → {total_pages} pages (one by one)")
-
+            print(f"[2/5] Processing PDF → {total_pages} pages")
             for page_num in range(total_pages):
-                print(f"   → Page {page_num + 1}/{total_pages}")
+                print(f" → Page {page_num + 1}/{total_pages}")
                 page = pdf_document.load_page(page_num)
                 pix = page.get_pixmap(dpi=200)
                 img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-
-                # Run OCR
                 predictions = recognition_predictor([img], det_predictor=detection_predictor)
 
                 full_extracted_text += f"\n--- START OF PAGE {page_num + 1} ---\n\n"
@@ -56,13 +65,10 @@ def extract_and_purge(file_path: str):
                         full_extracted_text += line.text + "\n"
                 full_extracted_text += f"\n--- END OF PAGE {page_num + 1} ---\n"
 
-                # Aggressive cleanup after every page
                 del img, pix, page, predictions
                 gc.collect()
                 if torch.cuda.is_available():
                     torch.cuda.empty_cache()
-                    torch.cuda.synchronize()   # ← Added for better release
-
         else:
             print("[2/5] Processing Image...")
             img = Image.open(file_path)
@@ -70,90 +76,104 @@ def extract_and_purge(file_path: str):
             for pred in predictions:
                 for line in pred.text_lines:
                     full_extracted_text += line.text + "\n"
-
             del img, predictions
             gc.collect()
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
-
     finally:
-        # FINAL STRONG CLEANUP - Most Important Part
-        print("[4/5] Releasing Surya OCR from GPU VRAM...")
+        print("[4/5] Releasing Surya OCR from GPU...")
         del foundation_predictor, recognition_predictor, detection_predictor
         gc.collect()
-
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
-            torch.cuda.synchronize()   # Force GPU to finish operations
-            print(f"   GPU Memory after cleanup: {torch.cuda.memory_allocated()/1024**2:.1f} MB allocated")
+            torch.cuda.synchronize()
 
-    # Save extracted text
     timestamp = int(time.time())
     output_filename = os.path.join(EXTRACTED_DIR, f"Extracted_{filename}_{timestamp}.txt")
     with open(output_filename, "w", encoding="utf-8") as f:
         f.write(full_extracted_text)
-
-    print(f"[*] OCR completed and GPU released → {output_filename}")
+    print(f"[*] OCR completed → {output_filename}")
     return full_extracted_text.strip()
 
-# ====================== PHASE 2: STORAGE ======================
-def store_data(text: str):
-    print("\n[5/5] Generating embeddings → ChromaDB")
+# ====================== PROCESS UPLOAD ======================
+def process_uploaded_document(file_path: str, uploaded_filename: str):
+    original_name = os.path.splitext(uploaded_filename)[0]
+    collection = get_chroma_collection()
+
+    existing = collection.get(where={"source_file": original_name})
+    if existing and len(existing.get('ids', [])) > 0:
+        print(f"[INFO] '{original_name}' already exists → skipping OCR")
+        return {
+            'status': 'exists',
+            'original_name': original_name,
+            'message': 'Document already processed.'
+        }
+
+    text = extract_and_purge(file_path)
+
+    print("\n[5/5] Generating embeddings → Permanent ChromaDB")
     embedder = get_embedder()
-
-    chroma_client = chromadb.PersistentClient(path=CHROMA_PATH)
-    try:
-        chroma_client.delete_collection("offline_docs")
-    except:
-        pass
-
-    collection = chroma_client.create_collection(name="offline_docs")
-
     chunk_size = 400
     chunks = [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]
     embeddings = embedder.encode(chunks).tolist()
-    ids = [f"chunk_{i}" for i in range(len(chunks))]
+    ids = [f"{original_name}_chunk_{i}" for i in range(len(chunks))]
+    metadatas = [{"source_file": original_name} for _ in range(len(chunks))]
 
-    collection.add(documents=chunks, embeddings=embeddings, ids=ids)
-    print(f"✅ Stored {len(chunks)} chunks")
-    return collection
+    collection.add(documents=chunks, embeddings=embeddings, ids=ids, metadatas=metadatas)
+    print(f"✅ Stored {len(chunks)} chunks for {original_name}")
 
-# ====================== PHASE 3: QUERY ======================
-def process_query(user_query: str):
+    del embedder
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
+    return {
+        'status': 'success',
+        'original_name': original_name,
+        'text_preview': text[:500] + '...' if len(text) > 500 else text
+    }
+
+# ====================== PROCESS QUERY (Added back) ======================
+def process_query(user_query: str, document_name: str, history: list = None):
     if not user_query.strip():
         return "Please ask a question."
 
-    embedder = get_embedder()
-    chroma_client = chromadb.PersistentClient(path=CHROMA_PATH)
+    if history is None:
+        history = []
 
-    try:
-        collection = chroma_client.get_collection("offline_docs")
-    except Exception:
-        return ":x: No document has been processed yet. Please upload and process a PDF/image first."
+    embedder = get_embedder()
+    collection = get_chroma_collection()
 
     try:
         query_embedding = embedder.encode(user_query).tolist()
-        results = collection.query(query_embeddings=[query_embedding], n_results=5)
+
+        results = collection.query(
+            query_embeddings=[query_embedding],
+            n_results=5,
+            where={"source_file": document_name}
+        )
 
         context = "\n\n".join(results.get('documents', [[]])[0]) if results.get('documents') else ""
 
         if not context.strip():
-            return "I could not find any relevant information in the document for your query."
+            return "I could not find any relevant information in the selected document."
 
-        system_prompt = f"""You are a highly intelligent, multilingual assistant.
+        system_prompt = f"""You are a highly intelligent, multilingual assistant for CP Office, Pune.
 Answer the user's question based ONLY on the provided document context.
 If the answer is not present in the context, clearly say "I could not find this information in the document."
+Be professional, precise and helpful. Use Marathi when the query is in Marathi.
 
 DOCUMENT CONTEXT:
 {context}
 """
 
+        messages = [{'role': 'system', 'content': system_prompt}]
+        messages.extend(history)
+        messages.append({'role': 'user', 'content': user_query})
+
         response = ollama.chat(
-            model='qwen3:8b',
-            messages=[
-                {'role': 'system', 'content': system_prompt},
-                {'role': 'user', 'content': user_query}
-            ]
+            model='qwen3:8    b',      # Recommended lighter model
+            messages=messages
         )
 
         return response['message']['content']
@@ -162,4 +182,4 @@ DOCUMENT CONTEXT:
         print(f"[ERROR in process_query]: {str(e)}")
         import traceback
         traceback.print_exc()
-        return f":x: An error occurred while processing your query: {str(e)}\n\nPlease make sure Ollama is running and the model 'qwen3:8b' is downloaded."
+        return f"An error occurred while processing your query: {str(e)}"

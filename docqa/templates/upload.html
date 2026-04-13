@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CP Office • Document Upload</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+</head>
+<body class="bg-gray-950 text-gray-200">
+  <nav class="bg-gray-900 border-b border-gray-800">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold flex items-center gap-3">
+        <i class="fa-solid fa-shield-halved text-blue-500"></i>
+        CP OFFICE - DOCQA
+      </h1>
+      <div class="flex gap-8 text-sm">
+        <a href="/" class="flex items-center gap-2 hover:text-blue-400"><i class="fa-solid fa-upload"></i> Upload</a>
+        <a href="/chat/" class="flex items-center gap-2 hover:text-blue-400"><i class="fa-solid fa-comments"></i> Chat</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto p-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Upload Card -->
+      <div class="bg-gray-900 rounded-3xl p-10">
+        <h2 class="text-3xl font-semibold mb-6 flex items-center gap-3">
+          <i class="fa-solid fa-cloud-upload text-emerald-500"></i> Upload New Document
+        </h2>
+
+        <div id="dropzone" class="border-4 border-dashed border-blue-500 rounded-3xl h-96 flex flex-col items-center justify-center hover:border-emerald-400 transition cursor-pointer">
+          <i id="drop-icon" class="fa-solid fa-file-pdf text-7xl text-blue-500 mb-6"></i>
+          <p class="text-2xl font-medium" id="drop-text">Drop PDF or Image here</p>
+          <p class="text-gray-400 mt-3">or</p>
+          <label id="browse-label" class="mt-6 px-8 py-4 bg-blue-600 hover:bg-blue-700 rounded-2xl cursor-pointer text-lg">
+            Browse Files
+            <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png" class="hidden">
+          </label>
+        </div>
+
+        <!-- Progress Bar -->
+        <div id="progress-container" class="hidden mt-8">
+          <div class="flex justify-between text-sm mb-2">
+            <span id="progress-text">Processing with Surya OCR...</span>
+            <span id="progress-percent">0%</span>
+          </div>
+          <div class="h-3 bg-gray-800 rounded-3xl overflow-hidden">
+            <div id="progress-bar" class="h-3 bg-emerald-500 w-0 transition-all duration-300"></div>
+          </div>
+        </div>
+
+        <button onclick="startProcessing()" id="process-btn"
+                class="mt-8 w-full py-5 bg-emerald-600 hover:bg-emerald-700 rounded-3xl font-bold text-xl flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed">
+          <i class="fa-solid fa-cogs"></i>
+          <span id="btn-text">Process with Surya OCR</span>
+        </button>
+      </div>
+
+      <!-- Processed Documents -->
+      <div class="bg-gray-900 rounded-3xl p-8">
+        <h2 class="text-2xl font-semibold mb-6 flex items-center justify-between">
+          Processed Documents
+          <span class="text-sm text-gray-400 font-normal" id="doc-count">0 documents</span>
+        </h2>
+        <div id="docs-list" class="space-y-3 max-h-[600px] overflow-y-auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BIG CENTERED POPUP -->
+  <div id="popup" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div onclick="event.stopImmediatePropagation()" class="bg-gray-900 rounded-3xl p-10 max-w-md w-full text-center">
+      <i id="popup-icon" class="text-7xl mb-6"></i>
+      <h3 id="popup-title" class="text-3xl font-bold mb-4"></h3>
+      <p id="popup-message" class="text-gray-300 text-lg"></p>
+      <button onclick="hidePopup()" class="mt-8 px-10 py-4 bg-blue-600 hover:bg-blue-700 rounded-3xl font-semibold">
+        OK
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let isProcessing = false;
+
+    async function loadProcessedDocs() {
+      const res = await fetch('/api/documents/');
+      const data = await res.json();
+      const container = document.getElementById('docs-list');
+      const countEl = document.getElementById('doc-count');
+      countEl.textContent = `${data.documents.length} documents`;
+
+      container.innerHTML = data.documents.map(doc => `
+        <div class="group bg-gray-800 rounded-2xl p-5 flex items-center justify-between hover:bg-gray-700 transition">
+          <div onclick="goToChat('${doc.original_filename}', '${doc.display_name}')" 
+               class="flex-1 cursor-pointer flex items-center gap-4">
+            <i class="fa-solid fa-file-lines text-blue-400 text-2xl"></i>
+            <div>
+              <div class="font-medium text-lg">${doc.display_name}</div>
+              <div class="text-xs text-gray-400">${new Date(doc.upload_date).toLocaleDateString('en-IN')}</div>
+            </div>
+          </div>
+          <button onclick="event.stopImmediatePropagation(); deleteDocument('${doc.original_filename}', '${doc.display_name}');" 
+                  class="text-red-400 hover:text-red-500 text-2xl opacity-0 group-hover:opacity-100 transition">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function goToChat(originalName, displayName) {
+      sessionStorage.setItem('selectedDocument', originalName);
+      sessionStorage.setItem('selectedDisplayName', displayName);
+      window.location.href = '/chat/';
+    }
+
+    async function deleteDocument(originalName, displayName) {
+      if (!confirm(`Delete "${displayName}"?`)) return;
+
+      const res = await fetch('/api/delete/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ original_filename: originalName })
+      });
+
+      const data = await res.json();
+      if (data.status === 'success') {
+        showPopup("✅ Deleted", `${displayName} deleted successfully.`, "fa-solid fa-check-circle", "text-emerald-500");
+        loadProcessedDocs();
+      } else {
+        showPopup("❌ Error", data.message, "fa-solid fa-triangle-exclamation", "text-red-500");
+      }
+    }
+
+    function showPopup(title, message, iconClass, colorClass) {
+      document.getElementById('popup-icon').className = `${iconClass} ${colorClass}`;
+      document.getElementById('popup-title').textContent = title;
+      document.getElementById('popup-message').innerHTML = message;
+      const popup = document.getElementById('popup');
+      popup.classList.remove('hidden');
+      popup.classList.add('flex');
+    }
+
+    function hidePopup() {
+      const popup = document.getElementById('popup');
+      popup.classList.add('hidden');
+      popup.classList.remove('flex');
+    }
+
+    // ==================== MAIN UPLOAD FUNCTION (STRICT BLOCK) ====================
+    async function uploadFile(file) {
+      if (isProcessing) {
+        showPopup("⏳ Processing in Progress", 
+                  "Please wait until the current document finishes processing.<br>Multiple uploads are not allowed.", 
+                  "fa-solid fa-hourglass-half", "text-yellow-500");
+        return;
+      }
+
+      isProcessing = true;
+
+      // Disable UI elements
+      const btn = document.getElementById('process-btn');
+      const dropzone = document.getElementById('dropzone');
+      const browseLabel = document.getElementById('browse-label');
+      const progressContainer = document.getElementById('progress-container');
+      const progressBar = document.getElementById('progress-bar');
+      const progressPercent = document.getElementById('progress-percent');
+
+      btn.disabled = true;
+      dropzone.style.pointerEvents = 'none';
+      dropzone.style.opacity = '0.6';
+      browseLabel.style.pointerEvents = 'none';
+      progressContainer.classList.remove('hidden');
+      progressBar.style.width = '0%';
+
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 18;
+        if (progress > 93) progress = 93;
+        progressBar.style.width = `${progress}%`;
+        progressPercent.textContent = `${Math.floor(progress)}%`;
+      }, 250);
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch('/api/upload/', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        clearInterval(interval);
+        progressBar.style.width = '100%';
+        progressPercent.textContent = '100%';
+
+        setTimeout(() => {
+          progressContainer.classList.add('hidden');
+          btn.disabled = false;
+          dropzone.style.pointerEvents = 'auto';
+          dropzone.style.opacity = '1';
+          browseLabel.style.pointerEvents = 'auto';
+          isProcessing = false;
+
+          if (data.status === 'success') {
+            showPopup("✅ Success!", 
+                      `${data.filename} processed successfully!`, 
+                      "fa-solid fa-check-circle", "text-emerald-500");
+            loadProcessedDocs();
+          } else if (data.status === 'exists') {
+            showPopup("⚠️ Already Exists", 
+                      `${data.filename} is already processed.`, 
+                      "fa-solid fa-info-circle", "text-yellow-500");
+            loadProcessedDocs();
+          } else {
+            showPopup("❌ Error", data.message || "Upload failed", "fa-solid fa-triangle-exclamation", "text-red-500");
+          }
+        }, 800);
+
+      } catch (err) {
+        clearInterval(interval);
+        isProcessing = false;
+        btn.disabled = false;
+        dropzone.style.pointerEvents = 'auto';
+        dropzone.style.opacity = '1';
+        showPopup("❌ Failed", "Something went wrong. Please try again.", "fa-solid fa-triangle-exclamation", "text-red-500");
+      }
+    }
+
+    function startProcessing() {
+      const input = document.getElementById('file-input');
+      if (input.files.length) uploadFile(input.files[0]);
+    }
+
+    // Drag & Drop with protection
+    const dropzone = document.getElementById('dropzone');
+    dropzone.addEventListener('dragover', e => { 
+      e.preventDefault(); 
+      if (!isProcessing) dropzone.classList.add('border-emerald-400'); 
+    });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('border-emerald-400'));
+    dropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropzone.classList.remove('border-emerald-400');
+      if (e.dataTransfer.files.length && !isProcessing) {
+        uploadFile(e.dataTransfer.files[0]);
+      } else if (isProcessing) {
+        showPopup("⏳ Processing...", "Please wait for current upload to finish.", "fa-solid fa-hourglass-half", "text-yellow-500");
+      }
+    });
+
+    document.getElementById('file-input').addEventListener('change', e => {
+      if (e.target.files.length && !isProcessing) {
+        uploadFile(e.target.files[0]);
+      }
+    });
+
+    // Load documents on start
+    window.onload = loadProcessedDocs;
+  </script>
+</body>
+</html>

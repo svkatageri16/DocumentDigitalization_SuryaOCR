@@ -2,7 +2,11 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.home, name='home'),
-    path('api/upload/', views.upload_document, name='upload'),
-    path('api/query/', views.query_document, name='query'),
+    path('', views.upload_page, name='home'),
+    path('upload/', views.upload_page, name='upload'),
+    path('chat/', views.chat_page, name='chat'),
+    path('api/upload/', views.upload_document, name='upload_api'),
+    path('api/documents/', views.get_documents, name='documents_api'),
+    path('api/query/', views.query_document, name='query_api'),
+    path('api/delete/', views.delete_document, name='delete_api'),   # ← NEW
 ]
