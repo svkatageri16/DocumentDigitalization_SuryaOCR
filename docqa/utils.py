@@ -172,7 +172,7 @@ DOCUMENT CONTEXT:
         messages.append({'role': 'user', 'content': user_query})
 
         response = ollama.chat(
-            model='qwen2.5:7b',      # Recommended lighter model
+            model='qwen3:8    b',      # Recommended lighter model
             messages=messages
         )
 
