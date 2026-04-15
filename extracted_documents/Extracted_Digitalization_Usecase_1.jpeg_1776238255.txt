@@ -1,0 +1,17 @@
+Real Requirements
+Fosy to read
+Dish
+Paddle Tessered Visual Pleasing
+Summory
+Reports
+(Mulhi larguage)
+Imy > PDF -> OCR -> Smort Analysis<br>Summay (Report)
+Summay (Report)
+Manual Nalidation<br>CPothice & Yes<br>(Status bor)
+If Approved
+Store in DB &
+Display year wise
+DB-Local as I now
+Crost Local aPT
+& Check Acarray.
+1 Future Scope.

@@ -1,53 +1,440 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CP Office • Document Upload</title>
+  <title>CP office Smart document analysis</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-  <style> .chat-scroll { max-height: 70vh; overflow-y: auto; } </style>
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at 20% 10%, rgba(72, 147, 255, 0.18), transparent 18%),
+                  radial-gradient(circle at 85% 15%, rgba(34, 211, 238, 0.12), transparent 16%),
+                  radial-gradient(circle at 50% 100%, rgba(99, 102, 241, 0.14), transparent 30%),
+                  linear-gradient(180deg, #040a16 0%, #08122f 42%, #101c38 100%);
+      color: #e5e7eb;
+    }
+    .chat-scroll { max-height: 70vh; overflow-y: auto; }
+    .page-shell {
+      position: relative;
+      min-height: 100vh;
+      padding: 32px 24px 48px;
+    }
+    .page-shell::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 50% 0%, rgba(255,255,255,0.08), transparent 25%),
+        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 120px 120px, 20px 20px, 20px 20px;
+      opacity: 0.18;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.62);
+      border: 1px solid rgba(255,255,255,0.11);
+      box-shadow: 0 28px 60px rgba(3, 13, 38, 0.45);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+    }
+    .drop-panel {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 30px;
+      min-height: 26rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+      transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .drop-panel:hover {
+      border-color: rgba(56, 189, 248, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 32px 65px rgba(6, 25, 67, 0.35);
+    }
+    .drop-panel i {
+      font-size: 5rem;
+      color: #ffffff;
+      text-shadow: 0 0 18px rgba(56, 189, 248, 0.45);
+    }
+    .drop-panel p {
+      margin: 0;
+      color: #eef2ff;
+    }
+    .drop-panel .drop-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      margin-bottom: 1rem;
+    }
+    .drop-panel .drop-subtitle {
+      color: rgba(226, 232, 240, 0.78);
+      margin-top: 1rem;
+      font-size: 1rem;
+    }
+    .glass-button {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.16);
+      color: #ffffff;
+      box-shadow: inset 0 0 20px rgba(255,255,255,0.08), 0 18px 38px rgba(5, 26, 64, 0.35);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      transition: transform 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .glass-button:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.14);
+      box-shadow: inset 0 0 26px rgba(255,255,255,0.12), 0 24px 56px rgba(5, 26, 64, 0.42);
+    }
+    .highlight-link {
+      color: rgba(56, 189, 248, 0.9);
+    }
+    .progress-track {
+      background: rgba(255,255,255,0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      height: 0.75rem;
+    }
+    .progress-fill {
+      background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+      width: 0%;
+      height: 100%;
+      transition: width 0.4s ease;
+    }
+    .theme-switch-wrap {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      gap: 0.35rem;
+    }
+    .theme-switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 32px;
+    }
+    .theme-switch-input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+    .theme-switch-slider {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.15);
+      transition: all 0.25s ease;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+    }
+    .theme-switch-slider::before {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 4px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #f8fafc;
+      transition: transform 0.25s ease, background 0.25s ease;
+      box-shadow: 0 3px 8px rgba(15, 23, 42, 0.2);
+    }
+    .theme-switch-input:checked + .theme-switch-slider {
+      background: #bfdbfe;
+    }
+    .theme-switch-input:checked + .theme-switch-slider::before {
+      transform: translateX(28px);
+      background: #1d4ed8;
+    }
+    .theme-switch:hover .theme-switch-slider {
+      background: rgba(148, 163, 184, 0.25);
+    }
+    .theme-switch-input:focus-visible + .theme-switch-slider {
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    }
+    .theme-label {
+      margin-top: 0.35rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(148, 163, 184, 0.95);
+    }
+    body.light .text-white { color: #0f172a !important; }
+    body.light .text-slate-400 { color: #475569 !important; }
+    body.light .text-cyan-300 { color: #1e40af !important; }
+    body.light .text-cyan-200 { color: #1d4ed8 !important; }
+    body.light .highlight-link { color: #1d4ed8 !important; }
+    body.light .highlight-link:hover { color: #2563eb !important; }
+    body.light .bg-cyan-500\/10 { background-color: rgba(30,64,175,0.12) !important; }
+    body.light .border-white\/10 { border-color: rgba(148,163,184,0.28) !important; }
+    body.light .border-white\/15 { border-color: rgba(148,163,184,0.35) !important; }
+    body.light .bg-white\/5 { background-color: rgba(255,255,255,0.8) !important; }
+    body.light .bg-white\/10 { background-color: rgba(255,255,255,0.85) !important; }
+    body.light .placeholder\:text-slate-400::placeholder { color: #475569 !important; }
+    body.light .bg-gray-800 { background: rgba(255,255,255,0.85) !important; }
+    body.light .bg-gray-900 { background: rgba(255,255,255,0.95) !important; }
+    .highlight-link:hover {
+      color: #8de0ff;
+    }
+    .hero-title {
+      font-size: clamp(2rem, 2.8vw, 3.6rem);
+      line-height: 1.05;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #ffffff;
+      text-align: center;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .hero-subtitle {
+      color: rgba(226, 232, 240, 0.78);
+      max-width: 720px;
+      margin: 1rem auto 0;
+      text-align: center;
+      font-size: 1rem;
+    }
+    .nav-shell {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      background: rgba(7, 18, 41, 0.72);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      margin-bottom: 2rem;
+    }
+    .nav-shell h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .nav-shell a {
+      color: rgba(226, 232, 240, 0.78);
+      transition: color 0.2s ease;
+    }
+    .nav-shell a:hover {
+      color: #ffffff;
+    }
+    .doc-item {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 24px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .doc-item:hover {
+      transform: translateY(-1px);
+      border-color: rgba(56, 189, 248, 0.35);
+      box-shadow: 0 18px 36px rgba(4, 16, 41, 0.24);
+    }
+    .doc-item-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: #ffffff;
+      font-weight: 600;
+    }
+    .doc-item-title i {
+      color: rgba(255,255,255,0.9);
+      font-size: 1rem;
+    }
+    .doc-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+    }
+    .delete-btn {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: 16px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+    }
+    .delete-btn:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+    .page-footer {
+      margin-top: 2rem;
+      display: flex;
+      justify-content: center;
+    }
+    body.light {
+      background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+      color: #1e293b;
+    }
+    body.light .glass-panel {
+      background: rgba(255,255,255,0.8);
+      border: 1px solid rgba(0,0,0,0.1);
+      box-shadow: 0 28px 60px rgba(0,0,0,0.1);
+    }
+    body.light .nav-shell {
+      background: rgba(255,255,255,0.8);
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+    body.light .nav-shell h1 {
+      color: #1e293b;
+    }
+    body.light .nav-shell a {
+      color: #1e40af;
+    }
+    body.light .doc-name {
+      color: #0f172a !important;
+    }
+    body.light .doc-item {
+      background: rgba(255,255,255,0.8);
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+    body.light .drop-panel {
+      background: rgba(255,255,255,0.8);
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+    body.light .drop-panel p {
+      color: #1e293b;
+    }
+    body.light .glass-button {
+      background: rgba(255,255,255,0.8);
+      border: 1px solid rgba(0,0,0,0.1);
+      color: #1e293b;
+    }
+    /* Transparent Scrollbar Styles */
+    #docs-list::-webkit-scrollbar {
+      width: 8px;
+    }
+    #docs-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    #docs-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+    #docs-list::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.35);
+    }
+    /* Firefox Scrollbar */
+    #docs-list {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    body.light #docs-list::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    body.light #docs-list::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 0, 0, 0.35);
+    }
+    body.light #docs-list {
+      scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+    }
+  </style>
 </head>
-<body class="bg-gray-950 text-gray-200">
-  <nav class="bg-gray-900 border-b border-gray-800">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-      <h1 class="text-2xl font-bold flex items-center gap-3">
-        <i class="fa-solid fa-shield-halved text-blue-500"></i>
-        CP OFFICE - DOCQA
-      </h1>
-      <div class="flex gap-8 text-sm">
-        <a href="/" class="flex items-center gap-2 hover:text-blue-400"><i class="fa-solid fa-upload"></i> Upload Document</a>
-        <a href="/chat/" class="flex items-center gap-2 hover:text-blue-400"><i class="fa-solid fa-comments"></i> Chat with Documents</a>
-      </div>
-    </div>
-  </nav>
-
-  <div class="max-w-7xl mx-auto p-8">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <!-- Upload Card -->
-      <div class="bg-gray-900 rounded-3xl p-10">
-        <h2 class="text-3xl font-semibold mb-6 flex items-center gap-3">
-          <i class="fa-solid fa-cloud-upload text-emerald-500"></i> Upload New Document
-        </h2>
-        <div id="dropzone" class="border-4 border-dashed border-blue-500 rounded-3xl h-96 flex flex-col items-center justify-center hover:border-emerald-400 transition cursor-pointer">
-          <i class="fa-solid fa-file-pdf text-7xl text-blue-500 mb-6"></i>
-          <p class="text-2xl font-medium">Drop PDF or Image here</p>
-          <p class="text-gray-400 mt-3">or</p>
-          <label class="mt-6 px-8 py-4 bg-blue-600 hover:bg-blue-700 rounded-2xl cursor-pointer text-lg">
-            Browse Files
-            <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png" class="hidden">
-          </label>
+<body>
+  <div class="page-shell">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="nav-shell">
+        <h1>CP office Smart document analysis</h1>
+        <div class="flex flex-wrap items-center gap-6 text-sm">
+          <a href="/" class="flex items-center gap-2"><i class="fa-solid fa-upload"></i> Upload Document</a>
+          <a href="/chat/" class="flex items-center gap-2"><i class="fa-solid fa-comments"></i> Chat with Documents</a>
+          <div class="theme-switch-wrap ml-4">
+            <label class="theme-switch">
+              <input id="theme-toggle-input" type="checkbox" class="theme-switch-input">
+              <span class="theme-switch-slider"></span>
+            </label>
+            <div class="theme-label">Theme</div>
+          </div>
         </div>
-        <button onclick="startProcessing()" id="process-btn" class="mt-8 w-full py-5 bg-emerald-600 hover:bg-emerald-700 rounded-3xl font-bold text-xl flex items-center justify-center gap-3">
-          <i class="fa-solid fa-cogs"></i>
-          <span id="btn-text">Process with Surya OCR</span>
-        </button>
       </div>
 
-      <!-- Processed Documents -->
-      <div class="bg-gray-900 rounded-3xl p-8">
-        <h2 class="text-2xl font-semibold mb-6">Processed Documents</h2>
-        <div id="docs-list" class="space-y-3"></div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <section class="glass-panel rounded-[32px] p-10">
+          <div class="flex flex-col gap-3">
+            <div class="flex items-center gap-3 text-white">
+              <i class="fa-solid fa-cloud-upload text-cyan-300"></i>
+              <h3 class="text-3xl font-semibold">Upload New Document</h3>
+            </div>
+            <p class="text-sm text-slate-400 max-w-xl">Drop your PDF or image here and begin smart processing with Surya OCR. The upload area is fully interactive and supports drag-and-drop.</p>
+          </div>
+
+          <div id="dropzone" class="drop-panel mt-10">
+            <p class="drop-title">Drop PDF or Image here</p>
+            <p class="drop-subtitle">or</p>
+            <label class="mt-8 inline-flex items-center justify-center rounded-full border border-white/15 px-10 py-3 text-white font-semibold cursor-pointer glass-button">
+              Browse Files
+              <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png" class="hidden">
+            </label>
+          </div>
+          <div id="upload-progress-container" class="mt-8 hidden">
+            <p id="upload-progress-label" class="text-sm text-cyan-300 mb-3">Preparing upload...</p>
+            <div class="progress-track">
+              <div id="upload-progress-fill" class="progress-fill"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="glass-panel rounded-[32px] p-10">
+          <div class="flex items-center justify-between gap-4 mb-8">
+            <div>
+              <p class="text-sm uppercase tracking-[0.3em] text-cyan-300">Processed Documents</p>
+              <h3 class="text-3xl font-semibold text-white mt-3">Your recent uploads</h3>
+            </div>
+            <span class="inline-flex items-center rounded-full bg-cyan-500/10 px-3 py-1 text-sm text-cyan-200">Live sync</span>
+          </div>
+
+          <div id="docs-list" class="space-y-4">
+            <div class="doc-item">
+              <div class="doc-item-title">
+                <i class="fa-solid fa-file-lines"></i>
+                <span class="doc-name">WhatsApp Image 2026-04-12 at 18.21.27 (1).jpeg</span>
+              </div>
+              <a href="/chat/" class="highlight-link text-sm font-medium">Chat →</a>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="page-footer">
+        <button onclick="startProcessing()" id="process-btn" class="glass-button inline-flex items-center justify-center gap-3 rounded-[28px] px-10 py-5 text-lg font-semibold tracking-wide uppercase">
+          <i class="fa-solid fa-gear"></i>
+          <span id="btn-text">PROCESS NEW DOCUMENTS WITH SURYA OCR</span>
+        </button>
       </div>
     </div>
   </div>
@@ -58,42 +445,127 @@
       const data = await res.json();
       const container = document.getElementById('docs-list');
       container.innerHTML = data.documents.map(doc => `
-        <div class="flex justify-between items-center bg-gray-800 rounded-2xl p-4">
-          <div>
-            <i class="fa-solid fa-file-lines text-blue-400"></i>
-            <span class="ml-3 font-medium">${doc.display_name}</span>
+        <div class="doc-item group">
+          <div class="doc-item-title flex-1 min-w-0">
+            <i class="fa-solid fa-file-lines"></i>
+            <span class="doc-name" title="${doc.display_name}">${doc.display_name}</span>
           </div>
-          <a href="/chat/" class="text-blue-400 hover:text-blue-300 text-sm font-medium">Chat →</a>
+          <div class="flex items-center gap-3">
+            <a href="/chat/?doc=${encodeURIComponent(doc.original_filename)}" class="highlight-link text-sm font-medium">Chat →</a>
+            <button onclick="deleteDocument('${doc.original_filename}', event)" class="delete-btn opacity-0 group-hover:opacity-100">
+              <i class="fa-solid fa-trash text-sm"></i>
+            </button>
+          </div>
         </div>
       `).join('');
     }
     loadProcessedDocs();
 
-    // Upload logic (same as before, slightly cleaned)
     async function uploadFile(file) {
       const formData = new FormData();
       formData.append('file', file);
-      document.getElementById('btn-text').innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Processing...`;
+      const processBtn = document.getElementById('process-btn');
+      const btnText = document.getElementById('btn-text');
+      processBtn.disabled = true;
+      btnText.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Processing...`;
+      startUploadProgress();
+
       const res = await fetch('/api/upload/', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.status === 'success') {
+        finishUploadProgress(true);
         alert(`:white_check_mark: ${data.filename} processed successfully!`);
         loadProcessedDocs();
       } else {
+        finishUploadProgress(false);
         alert(data.message);
       }
-      document.getElementById('btn-text').innerHTML = `<i class="fa-solid fa-cogs"></i> Process with Surya OCR`;
+      btnText.innerHTML = `<i class="fa-solid fa-cogs"></i> Process with Surya OCR`;
+      processBtn.disabled = false;
     }
     function startProcessing() {
       const input = document.getElementById('file-input');
       if (input.files.length) uploadFile(input.files[0]);
     }
-    // Drag & Drop + click (same as your old code)
+
+    function startUploadProgress() {
+      const container = document.getElementById('upload-progress-container');
+      const fill = document.getElementById('upload-progress-fill');
+      const label = document.getElementById('upload-progress-label');
+      container.classList.remove('hidden');
+      fill.style.width = '5%';
+      label.textContent = 'Uploading and extracting document...';
+      if (window.uploadProgressInterval) clearInterval(window.uploadProgressInterval);
+      window.uploadProgressInterval = setInterval(() => {
+        const current = parseFloat(fill.style.width) || 0;
+        if (current < 90) {
+          fill.style.width = `${Math.min(90, current + Math.random() * 4 + 1)}%`;
+        }
+      }, 350);
+    }
+
+    function finishUploadProgress(success = true) {
+      const container = document.getElementById('upload-progress-container');
+      const fill = document.getElementById('upload-progress-fill');
+      const label = document.getElementById('upload-progress-label');
+      if (window.uploadProgressInterval) clearInterval(window.uploadProgressInterval);
+      fill.style.width = '100%';
+      label.textContent = success ? 'Extraction complete.' : 'Upload failed. Please retry.';
+      setTimeout(() => {
+        if (success) {
+          container.classList.add('hidden');
+          fill.style.width = '0%';
+        }
+      }, 900);
+    }
+
     const dropzone = document.getElementById('dropzone');
-    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('border-emerald-400'); });
-    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('border-emerald-400'));
-    dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('border-emerald-400'); if (e.dataTransfer.files.length) uploadFile(e.dataTransfer.files[0]); });
+    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('border-cyan-400'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('border-cyan-400'));
+    dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('border-cyan-400'); if (e.dataTransfer.files.length) uploadFile(e.dataTransfer.files[0]); });
     document.getElementById('file-input').addEventListener('change', e => { if (e.target.files.length) uploadFile(e.target.files[0]); });
+
+    const themeToggleInput = document.getElementById('theme-toggle-input');
+    function applyTheme(theme) {
+      if (theme === 'light') {
+        document.body.classList.add('light');
+        themeToggleInput.checked = true;
+      } else {
+        document.body.classList.remove('light');
+        themeToggleInput.checked = false;
+      }
+      localStorage.setItem('suryaTheme', theme);
+    }
+
+    themeToggleInput.addEventListener('change', () => {
+      applyTheme(themeToggleInput.checked ? 'light' : 'dark');
+    });
+
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('suryaTheme');
+      applyTheme(savedTheme === 'light' ? 'light' : 'dark');
+    }
+
+    loadTheme();
+
+    async function deleteDocument(originalName, event) {
+      event.stopPropagation();
+      if (!confirm('Are you sure you want to delete this document?')) return;
+
+      const res = await fetch('/api/documents/delete/', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ document_name: originalName })
+      });
+
+      const data = await res.json();
+      if (data.status === 'success') {
+        loadProcessedDocs();
+        alert('Document deleted successfully!');
+      } else {
+        alert('Error deleting document: ' + data.message);
+      }
+    }
   </script>
 </body>
 </html>

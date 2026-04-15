@@ -59,18 +59,62 @@ def get_documents(request):
 @csrf_exempt
 def query_document(request):
     if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            query = data.get('query', '')
+            document_name = data.get('document_name', '')
+            history = data.get('history', [])
+
+            print(f"[query_document] Received query: '{query[:50]}...', document_name: '{document_name}'")
+            
+            if not document_name:
+                return JsonResponse({'status': 'error', 'response': 'Please select a document first.'})
+            
+            if not query.strip():
+                return JsonResponse({'status': 'error', 'response': 'Please enter a question.'})
+
+            response = process_query(query, document_name, history)
+            print(f"[query_document] Response generated successfully")
+            return JsonResponse({'status': 'success', 'response': response})
+        except Exception as e:
+            print(f"[query_document] Error: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({'status': 'error', 'response': f'Server error: {str(e)}'}, status=500)
+
+    return JsonResponse({'status': 'error', 'response': 'Invalid request method'}, status=400)
+
+
+@csrf_exempt
+def delete_document(request):
+    if request.method == 'DELETE':
         data = json.loads(request.body)
-        query = data.get('query', '')
         document_name = data.get('document_name', '')
-        history = data.get('history', [])
 
         if not document_name:
-            return JsonResponse({'status': 'error', 'response': 'Please select a document first.'})
+            return JsonResponse({'status': 'error', 'message': 'No document name provided'}, status=400)
 
-        response = process_query(query, document_name, history)
-        return JsonResponse({'status': 'success', 'response': response})
+        try:
+            doc = ProcessedDocument.objects.get(original_filename=document_name)
+            
+            # Delete associated files if they exist
+            extracted_file_path = f'extracted_documents/Extracted_{document_name}_*.txt'
+            import glob
+            for file in glob.glob(extracted_file_path):
+                try:
+                    os.remove(file)
+                except:
+                    pass
+            
+            # Delete from database
+            doc.delete()
+            return JsonResponse({'status': 'success', 'message': 'Document deleted successfully'})
+        except ProcessedDocument.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Document not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
-    return JsonResponse({'status': 'error'}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
 
 def upload_page(request):

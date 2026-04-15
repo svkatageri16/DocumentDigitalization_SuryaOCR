@@ -136,19 +136,31 @@ def process_query(user_query: str, document_name: str, history: list = None):
     if history is None:
         history = []
 
+    print(f"[DEBUG process_query] user_query='{user_query[:50]}...', document_name='{document_name}'")
+    
     embedder = get_embedder()
     collection = get_chroma_collection()
 
     try:
         query_embedding = embedder.encode(user_query).tolist()
+        print(f"[DEBUG process_query] Querying ChromaDB with source_file='{document_name}'")
         results = collection.query(
             query_embeddings=[query_embedding],
             n_results=5,
             where={"source_file": document_name}
         )
+        print(f"[DEBUG process_query] Query results: {len(results.get('documents', [[]])[0])} documents found")
         context = "\n\n".join(results.get('documents', [[]])[0]) if results.get('documents') else ""
 
         if not context.strip():
+            print(f"[DEBUG process_query] No context found for document '{document_name}'")
+            print(f"[DEBUG process_query] Available source_files in DB:")
+            all_results = collection.get()
+            unique_sources = set()
+            for metadata in all_results.get('metadatas', []):
+                unique_sources.add(metadata.get('source_file'))
+            for source in sorted(unique_sources):
+                print(f"  - {source}")
             return "I could not find any relevant information in the selected document."
 
         system_prompt = f"""You are a highly intelligent, multilingual assistant for CP Office, Pune.
@@ -164,10 +176,12 @@ DOCUMENT CONTEXT:
         messages.extend(history)
         messages.append({'role': 'user', 'content': user_query})
 
+        print(f"[DEBUG process_query] Sending request to Ollama with {len(messages)} messages")
         response = ollama.chat(
             model='qwen3:8b',
             messages=messages
         )
+        print(f"[DEBUG process_query] Ollama response received")
         return response['message']['content']
 
     except Exception as e:

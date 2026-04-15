@@ -8,4 +8,5 @@ urlpatterns = [
     path('api/upload/', views.upload_document, name='upload_api'),
     path('api/documents/', views.get_documents, name='documents_api'),
     path('api/query/', views.query_document, name='query_api'),
+    path('api/documents/delete/', views.delete_document, name='delete_api'),
 ]

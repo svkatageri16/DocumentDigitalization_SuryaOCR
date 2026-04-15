@@ -1,56 +1,367 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CP Office • Chat</title>
+  <title>CP office Smart document analysis</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at 20% 10%, rgba(72, 147, 255, 0.18), transparent 18%),
+                  radial-gradient(circle at 85% 15%, rgba(34, 211, 238, 0.12), transparent 16%),
+                  radial-gradient(circle at 50% 100%, rgba(99, 102, 241, 0.14), transparent 30%),
+                  linear-gradient(180deg, #040a16 0%, #08122f 42%, #101c38 100%);
+      color: #e5e7eb;
+    }
+    .page-shell {
+      position: relative;
+      min-height: 100vh;
+      padding: 32px 24px 48px;
+    }
+    .page-shell::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 50% 0%, rgba(255,255,255,0.08), transparent 25%),
+        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 120px 120px, 20px 20px, 20px 20px;
+      opacity: 0.18;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.62);
+      border: 1px solid rgba(255,255,255,0.11);
+      box-shadow: 0 28px 60px rgba(3, 13, 38, 0.45);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+    }
+    .nav-shell {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      background: rgba(7, 18, 41, 0.72);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      margin-bottom: 2rem;
+    }
+    .nav-shell h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .nav-shell a {
+      color: rgba(226, 232, 240, 0.78);
+      transition: color 0.2s ease;
+    }
+    .nav-shell a:hover {
+      color: #ffffff;
+    }
+    .sidebar-item {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 24px;
+      padding: 1rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .sidebar-item:hover {
+      transform: translateY(-1px);
+      border-color: rgba(56, 189, 248, 0.35);
+      box-shadow: 0 14px 35px rgba(5, 21, 47, 0.16);
+    }
+    .sidebar-item.active {
+      border-color: rgba(56, 189, 248, 0.5);
+      background: rgba(56, 189, 248, 0.08);
+    }
+    .sidebar-item .meta {
+      color: rgba(226, 232, 240, 0.72);
+      font-size: 0.85rem;
+    }
+    .doc-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+    }
+    .delete-btn {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: 16px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .delete-btn:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+    .chat-scroll { max-height: 70vh; overflow-y: auto; }
+    .chat-bubble {
+      max-width: 75%;
+      border-radius: 28px;
+      padding: 1rem 1.25rem;
+      line-height: 1.65;
+    }
+    .chat-user {
+      background: rgba(56, 189, 248, 0.18);
+      color: #ffffff;
+    }
+    .chat-ai {
+      background: rgba(255,255,255,0.06);
+      color: #e5e7eb;
+    }
+    .chat-actions {
+      border-top: 1px solid rgba(255,255,255,0.12);
+      padding-top: 1.25rem;
+      margin-top: 1.5rem;
+    }
+    .button-primary {
+      background: rgba(56, 189, 248, 0.18);
+      color: #ffffff;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+    .button-primary:hover {
+      background: rgba(56, 189, 248, 0.24);
+    }
+    .theme-switch-wrap {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      gap: 0.35rem;
+    }
+    .theme-switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 32px;
+    }
+    .theme-switch-input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+    .theme-switch-slider {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.15);
+      transition: all 0.25s ease;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+    }
+    .theme-switch-slider::before {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 4px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #f8fafc;
+      transition: transform 0.25s ease, background 0.25s ease;
+      box-shadow: 0 3px 8px rgba(15, 23, 42, 0.2);
+    }
+    .theme-switch-input:checked + .theme-switch-slider {
+      background: #bfdbfe;
+    }
+    .theme-switch-input:checked + .theme-switch-slider::before {
+      transform: translateX(28px);
+      background: #1d4ed8;
+    }
+    .theme-switch:hover .theme-switch-slider {
+      background: rgba(148, 163, 184, 0.25);
+    }
+    .theme-switch-input:focus-visible + .theme-switch-slider {
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    }
+    .theme-label {
+      margin-top: 0.35rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(148, 163, 184, 0.95);
+    }
+    body.light {
+      background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+      color: #1e293b;
+    }
+    body.light .glass-panel {
+      background: rgba(255,255,255,0.8);
+      border: 1px solid rgba(0,0,0,0.1);
+      box-shadow: 0 28px 60px rgba(0,0,0,0.1);
+    }
+    body.light .nav-shell {
+      background: rgba(255,255,255,0.8);
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+    body.light .nav-shell h1 {
+      color: #1e293b;
+    }
+    body.light .nav-shell a {
+      color: #1e40af;
+    }
+    body.light .doc-name {
+      color: #0f172a !important;
+    }
+    body.light .text-cyan-300 {
+      color: #1e40af !important;
+    }
+    body.light .text-cyan-200 {
+      color: #1d4ed8 !important;
+    }
+    body.light .highlight-link {
+      color: #1d4ed8 !important;
+    }
+    body.light .highlight-link:hover {
+      color: #2563eb !important;
+    }
+    body.light .text-white {
+      color: #0f172a !important;
+    }
+    body.light .sidebar-item .meta {
+      color: #1e40af !important;
+    }
+    body.light .sidebar-item {
+      background: rgba(255,255,255,0.8);
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+    body.light .chat-user {
+      background: rgba(56, 189, 248, 0.3);
+      color: #1e293b;
+    }
+    body.light .chat-ai {
+      background: rgba(0,0,0,0.05);
+      color: #1e293b;
+    }
+    body.light .button-primary {
+      background: rgba(56, 189, 248, 0.2);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #1e293b;
+    }
+    body.light .clear-chat-btn:hover {
+      color: #1e293b !important;
+    }
+    /* Transparent Scrollbar Styles */
+    .glass-panel::-webkit-scrollbar,
+    .chat-scroll::-webkit-scrollbar {
+      width: 8px;
+    }
+    .glass-panel::-webkit-scrollbar-track,
+    .chat-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .glass-panel::-webkit-scrollbar-thumb,
+    .chat-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+    .glass-panel::-webkit-scrollbar-thumb:hover,
+    .chat-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.35);
+    }
+    /* Firefox Scrollbar */
+    .glass-panel,
+    .chat-scroll {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    }
+    body.light .glass-panel::-webkit-scrollbar-thumb,
+    body.light .chat-scroll::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    body.light .glass-panel::-webkit-scrollbar-thumb:hover,
+    body.light .chat-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 0, 0, 0.35);
+    }
+    body.light .glass-panel,
+    body.light .chat-scroll {
+      scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+    }
+  </style>
 </head>
-<body class="bg-gray-950 text-gray-200">
-  <nav class="bg-gray-900 border-b border-gray-800 px-6 py-4">
-    <div class="max-w-7xl mx-auto flex justify-between items-center">
-      <h1 class="text-2xl font-bold flex items-center gap-3">
-        <i class="fa-solid fa-shield-halved text-blue-500"></i>
-        CP OFFICE - DOCQA
-      </h1>
-      <a href="/" class="flex items-center gap-2 hover:text-blue-400">
-        <i class="fa-solid fa-upload"></i> Upload New Document
-      </a>
-    </div>
-  </nav>
-
-  <div class="flex h-[calc(100vh-73px)] max-w-7xl mx-auto">
-    <!-- Sidebar: Documents -->
-    <div class="w-80 bg-gray-900 border-r border-gray-800 p-6 overflow-y-auto">
-      <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
-        <i class="fa-solid fa-folder-open"></i> Saved Documents
-      </h2>
-      <div id="docs-sidebar" class="space-y-2"></div>
-    </div>
-
-    <!-- Main Chat Area -->
-    <div class="flex-1 flex flex-col">
-      <div id="chat-header" class="bg-gray-900 border-b border-gray-800 px-8 py-5 hidden">
-        <div class="flex items-center gap-3">
-          <i class="fa-solid fa-file-lines text-emerald-500"></i>
-          <span id="selected-doc-name" class="font-semibold text-lg"></span>
+<body>
+  <div class="page-shell">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="nav-shell">
+        <h1><i class="fa-solid fa-shield-halved text-cyan-300"></i> CP office Smart document analysis</h1>
+        <div class="flex flex-wrap items-center gap-6 text-sm">
+          <a href="/" class="flex items-center gap-2"><i class="fa-solid fa-upload"></i> Upload Document</a>
+          <a href="/chat/" class="flex items-center gap-2"><i class="fa-solid fa-comments"></i> Chat with Documents</a>
+          <div class="theme-switch-wrap ml-4">
+            <label class="theme-switch">
+              <input id="theme-toggle-input" type="checkbox" class="theme-switch-input">
+              <span class="theme-switch-slider"></span>
+            </label>
+            <div class="theme-label">Theme</div>
+          </div>
         </div>
       </div>
 
-      <div id="chat-messages" class="flex-1 p-8 overflow-y-auto space-y-6 chat-scroll"></div>
+      <div class="grid lg:grid-cols-[280px_minmax(0,1fr)] gap-6">
+        <aside class="glass-panel rounded-[32px] p-6 h-[calc(100vh-124px)] overflow-y-auto">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <p class="text-sm uppercase tracking-[0.3em] text-cyan-300">Saved Documents</p>
+              <h2 class="text-2xl font-semibold text-white mt-3">Choose a document</h2>
+            </div>
+          </div>
+          <div id="docs-sidebar" class="space-y-3"></div>
+        </aside>
 
-      <div class="p-6 border-t border-gray-800 bg-gray-900">
-        <div class="flex gap-3">
-          <input id="user-input" type="text" placeholder="Ask anything about the selected document..."
-                 class="flex-1 bg-gray-800 rounded-3xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <button onclick="sendMessage()" class="px-10 bg-blue-600 hover:bg-blue-700 rounded-3xl">
-            <i class="fa-solid fa-paper-plane"></i>
-          </button>
-        </div>
-        <button onclick="clearChat()" class="text-xs text-gray-400 mt-3 hover:text-gray-300">
-          <i class="fa-solid fa-trash"></i> Clear Chat
-        </button>
+        <main class="flex flex-col gap-6">
+          <section class="glass-panel rounded-[32px] p-6 flex flex-col h-[calc(100vh-124px)]">
+            <div id="chat-header" class="hidden mb-6 rounded-3xl border border-white/10 bg-white/5 p-4 text-white">
+              <div class="flex items-center gap-3 min-w-0">
+                <i class="fa-solid fa-file-lines text-cyan-300 flex-shrink-0"></i>
+                <span id="selected-doc-name" class="doc-name font-semibold text-lg min-w-0"></span>
+              </div>
+            </div>
+
+            <div id="chat-messages" class="flex-1 overflow-y-auto space-y-6 chat-scroll"></div>
+
+            <div class="chat-actions mt-6">
+              <div class="flex gap-3">
+                <input id="user-input" type="text" placeholder="Ask anything about the selected document..."
+                       class="flex-1 bg-white/5 rounded-3xl px-6 py-4 text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+                <button onclick="sendMessage()" class="px-10 py-4 rounded-3xl button-primary text-white font-semibold">
+                  <i class="fa-solid fa-paper-plane"></i>
+                </button>
+              </div>
+              <button onclick="clearChat()" class="clear-chat-btn text-sm text-slate-400 mt-3 hover:text-white">
+                <i class="fa-solid fa-trash"></i> Clear Chat
+              </button>
+            </div>
+          </section>
+        </main>
       </div>
     </div>
   </div>
@@ -62,27 +373,54 @@
     async function loadDocuments() {
       const res = await fetch('/api/documents/');
       const data = await res.json();
+      
+      // Check for document parameter in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const selectedDoc = urlParams.get('doc');
+      
+      let documentsToShow = data.documents;
+      
+      // If a specific document is requested, filter to show only that one
+      if (selectedDoc) {
+        documentsToShow = data.documents.filter(doc => doc.original_filename === selectedDoc);
+        if (documentsToShow.length > 0 && !currentDocument) {
+          currentDocument = selectedDoc;
+        }
+      }
+      
       const container = document.getElementById('docs-sidebar');
-      container.innerHTML = data.documents.map(doc => `
-        <div onclick="selectDocument('${doc.original_filename}', '${doc.display_name}')"
-             class="cursor-pointer p-4 rounded-2xl hover:bg-gray-800 flex items-center gap-3 ${currentDocument === doc.original_filename ? 'bg-blue-900' : ''}">
-          <i class="fa-solid fa-file-lines text-blue-400"></i>
-          <div class="flex-1">
-            <div class="font-medium">${doc.display_name}</div>
-            <div class="text-xs text-gray-400">${new Date(doc.upload_date).toLocaleDateString('en-IN')}</div>
+      container.innerHTML = documentsToShow.map(doc => `
+        <div class="sidebar-item group ${currentDocument === doc.original_filename ? 'active' : ''}">
+          <i class="fa-solid fa-file-lines text-cyan-300"></i>
+          <div class="flex-1 min-w-0">
+            <div class="doc-name font-medium text-white cursor-pointer" onclick="selectDocument('${doc.original_filename}', '${doc.display_name}')" title="${doc.display_name}">${doc.display_name}</div>
+            <div class="meta">${new Date(doc.upload_date).toLocaleDateString('en-IN')}</div>
           </div>
+          <button onclick="deleteDocument('${doc.original_filename}', event)" class="delete-btn opacity-0 group-hover:opacity-100">
+            <i class="fa-solid fa-trash text-sm"></i>
+          </button>
         </div>
       `).join('');
+      
+      // Auto-select the document if specified in URL
+      if (selectedDoc && documentsToShow.length > 0 && !currentDocument) {
+        const selectedDocument = documentsToShow.find(doc => doc.original_filename === selectedDoc);
+        if (selectedDocument) {
+          selectDocument(selectedDocument.original_filename, selectedDocument.display_name, true);
+        }
+      }
     }
 
-    function selectDocument(originalName, displayName) {
+    function selectDocument(originalName, displayName, skipReload = false) {
       currentDocument = originalName;
       document.getElementById('chat-header').classList.remove('hidden');
       document.getElementById('selected-doc-name').innerHTML = `<strong>${displayName}</strong>`;
       chatHistory = [];
       document.getElementById('chat-messages').innerHTML = '';
-      addMessage('ai', `:white_check_mark: Connected to document: <strong>${displayName}</strong><br>You can now ask questions.`);
-      loadDocuments(); // refresh highlight
+      addMessage('ai', `Connected to document: <strong>${displayName}</strong><br>You can now ask questions.`);
+      if (!skipReload) {
+        loadDocuments();
+      }
     }
 
     function addMessage(sender, text) {
@@ -90,7 +428,7 @@
       const bubble = document.createElement('div');
       bubble.className = sender === 'user' ? 'flex justify-end' : 'flex justify-start';
       bubble.innerHTML = `
-        <div class="${sender === 'user' ? 'bg-blue-600' : 'bg-gray-800'} max-w-[75%] rounded-3xl px-6 py-4">
+        <div class="chat-bubble ${sender === 'user' ? 'chat-user' : 'chat-ai'}">
           ${text}
         </div>
       `;
@@ -107,19 +445,40 @@
       chatHistory.push({ role: 'user', content: query });
       input.value = '';
 
-      const res = await fetch('/api/query/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      try {
+        console.log('sendMessage called with query:', query);
+        console.log('currentDocument:', currentDocument);
+        const requestBody = {
           query: query,
           document_name: currentDocument,
           history: chatHistory
-        })
-      });
-      const data = await res.json();
-      const answer = data.response;
-      addMessage('ai', answer);
-      chatHistory.push({ role: 'assistant', content: answer });
+        };
+        console.log('Sending request to /api/query/ with:', requestBody);
+        
+        const res = await fetch('/api/query/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody)
+        });
+        
+        console.log('Response status:', res.status);
+        const data = await res.json();
+        console.log('Response data:', data);
+        
+        if (!res.ok || data.status === 'error') {
+          const errorMsg = data.response || data.message || 'An error occurred while processing your query.';
+          console.error('API Error:', errorMsg);
+          addMessage('ai', `❌ Error: ${errorMsg}`);
+          return;
+        }
+        
+        const answer = data.response;
+        addMessage('ai', answer);
+        chatHistory.push({ role: 'assistant', content: answer });
+      } catch (error) {
+        console.error('Error in sendMessage:', error);
+        addMessage('ai', `❌ Network Error: ${error.message}`);
+      }
     }
 
     function clearChat() {
@@ -130,7 +489,58 @@
       }
     }
 
-    // Init
+    async function deleteDocument(originalName, event) {
+      event.stopPropagation();
+      if (!confirm('Are you sure you want to delete this document?')) return;
+
+      const res = await fetch('/api/documents/delete/', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ document_name: originalName })
+      });
+
+      const data = await res.json();
+      if (data.status === 'success') {
+        if (currentDocument === originalName) {
+          currentDocument = null;
+          document.getElementById('chat-header').classList.add('hidden');
+          document.getElementById('chat-messages').innerHTML = '';
+        }
+        loadDocuments();
+        alert('Document deleted successfully!');
+      } else {
+        alert('Error deleting document: ' + data.message);
+      }
+    }
+
+    const themeToggleInput = document.getElementById('theme-toggle-input');
+    function applyTheme(theme) {
+      if (theme === 'light') {
+        document.body.classList.add('light');
+        themeToggleInput.checked = true;
+      } else {
+        document.body.classList.remove('light');
+        themeToggleInput.checked = false;
+      }
+      localStorage.setItem('suryaTheme', theme);
+    }
+
+    themeToggleInput.addEventListener('change', () => {
+      applyTheme(themeToggleInput.checked ? 'light' : 'dark');
+    });
+
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('suryaTheme');
+      applyTheme(savedTheme === 'light' ? 'light' : 'dark');
+    }
+
+    document.getElementById('user-input').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+
+    loadTheme();
     loadDocuments();
   </script>
 </body>
