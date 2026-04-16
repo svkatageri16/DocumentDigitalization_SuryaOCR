@@ -1,0 +1,452 @@
+
+--- START OF PAGE 1 ---
+
+Open Journal of Social Sciences, 2021, 9, 498-506
+Scientific
+https://www.scirp.org/journal/jss
+Research
+ISSN Online: 2327-5960
+<b>Publishing</b>
+ISSN Print: 2327-5952
+<b>Face Recognition in Law Enforcement:</b>
+A Comparative Analysis of China
+and the United States
+Lulu Wang
+School of Social and Political Science, The University of Edinburgh, Edinburgh, UK
+Email: l.wang-122@sms.ed.ac.uk
+<b>Abstract</b>
+How to cite this paper: Wang, L. L.
+(2021). Face Recognition in Law Enforce-
+The use of facial recognition is becoming increasingly widespread in China,
+ment: A Comparative Analysis of China
+and the United States. Open Journal of
+with mobile phones, banks, police stations and so on. Facial recognition has
+Social Sciences, 9, 498-506.
+brought a certain benefit to social life in China, but in some areas of the
+https://doi.org/10.4236/jss.2021.910036
+United States facial recognition is prohibited. Facial recognition. This article
+discusses the use of face recognition in national law enforcement and com-
+Received: September 28, 2021
+Accepted: October 26, 2021
+pares commercial applications with those in China and the United States.
+Published: October 29, 2021
+Through comparison, we can understand the influence of face recognition in
+a different environment and the different effects of different application
+forms. The macro interaction between technology, the state and business
+shapes the social construction, and at a micro level everyone in society needs
+to be informed and aware of the costs and risks of using face recognition. In-
+creased individual self-awareness helps to counteract the potential technolo-
+gical cage.
+<b>Keywords</b>
+Face Recognition, Chins, the United States, Comparison
+1. Introduction
+I noticed that my grandmother's new neighbourhood had installed a face recog-
+nition system at the door. The face recognition system is used to access the resi-
+dential area's access control, which is used to determine whether the person en-
+tering the residential area is a resident of the residential area. If so, the door will
+automatically open, if not, people need to explain to the community security to
+come here and register personal information before entering. So I randomly
+asked eight of my grandmother's neighbours if they had any ideas about instal-
+<b>Open Journal of Social Sciences</b>
+DOI: 10.4236/jss.2021.910036 Oct. 29, 2021
+498
+
+--- END OF PAGE 1 ---
+
+--- START OF PAGE 2 ---
+
+L. L. Wang
+ling a face recognition system at the entrance to the neighbourhood to control
+access. Their point of view has the following two aspects: 1) convenient, the
+household direct brush face speed can quickly enter the community. 2) Security,
+facial recognition in access control applications can control who enters the
+community, can prevent people who are not residents of the community.
+The city that my grandmother lives in belongs to the 4th and 5th line of China.
+Face recognition can be used to access residential area in the 4th and 5th line of
+cities, reflecting something and an inevitable trend. Of course, the range of ap-
+plication of face recognition system is extensive; the combination of face recog-
+nition and access control is only one of the applications of face recognition. Fa-
+cial recognition can also be used as account login, timecard, search for missing
+persons, etc.
+So what exactly does facial recognition give us? How do we view the impact of
+face recognition systems? According to the use of the main body of face recogni-
+tion, face recognition is used by the state and enterprises, respectively. The state
+adopts facial recognition as a governance method for law enforcement depart-
+ments, such as Shoplifting, suspect tracking and investigation (Zhao et al., 2003).
+Alternatively, enterprises can develop the technology as a commercial product,
+such as WeChat payment, Amazon Recognition, etc. The public debate over the
+reaction to facial recognition systems has focused on privacy (Steinacker et al.,
+2020), public acceptance and discrimination.
+This paper discusses the use of face recognition in national law enforcement
+and compares commercial applications with those in China and the United
+States.
+Why choose China and the US for comparison?
+First, through comparison, we can understand the influence of face recogni-
+tion in a different environment and the different effects of different application
+forms. Second, both countries lead the world in the number of cameras used.
+The United States ranks first in the number of cameras per 100 people, while
+China ranks second<sup>1</sup>. The last, these two countries have different forms of state
+organisation. China and the United States are one of the One-Party Socialist
+Republic and the Federal Parliamentary Republic respectively and represent
+these two different political categories.
+2. Facial Recognition and Law Enforcement
+Facial recognition is a technology that can detect and measure facial features
+quickly and accurately (Liu, Yan, & Hu, 2021). Whether in China or the United
+States, or European countries, law enforcement agencies or governments will use
+biometric collection to monitor the public. Matching biological information
+with individuals improves the efficiency of law enforcement departments in
+searching for individuals, and this efficiency improvement can be applied to
+searching for suspects, quickly getting information and contact of individuals, to
+<sup>1</sup>The websites address of the rank is
+<math display="block">\underline{https://www.precisesecurity.com/articles/Top-10-Countries-by-Number-of-CCTV-Cameras.}</math>
+<b>Open Journal of Social Sciences</b>
+DOI: 10.4236/jss.2021.910036
+499
+
+--- END OF PAGE 2 ---
+
+--- START OF PAGE 3 ---
+
+L. L. Wang
+obtain more clues efficiently.
+The main features of face recognition can be summarised as identity verifica-
+tion and monitoring (Xing, 2020). With The increasing importance of surveil-
+lance-related applications (Zhao et al., 2003), surveillance in face recognition has
+become more common. There are two main topics between face recognition and
+law enforcement. One is that face recognition is used by law enforcement. The
+combination of the two has a corresponding impact on the public all over the
+world. The second is that the legal integrity of face recognition, both private and
+public, lags behind the complete adoption and innovation of the technology
+(Steinacker et al., 2020).
+Xiao noted that China's use of the Internet and artificial intelligence technol-
+ogy has increased government surveillance of the public, leading to a shift to-
+ward digital centralization./n/nPublic Freedoms are limited by the state's access
+to big data, and the collection of facial information by law enforcement agencies
+across the country is part of that monitoring (Xiao, 2019). Some scholars also
+argue that Chinese citizens do not have the exact self-protection mechanisms as
+American citizens, namely that the Chinese public cannot have their right to
+privacy in public places and oppose unreasonable seizure and search (Lopez,
+2020). The Chinese government's digital regulatory and other policies to en-
+hance its surveillance of its citizens are the focus of international discussion. Will
+the public's sense of privacy and freedom diminish under the supervision of the
+state? Indeed, China has the most considerable acceptance of facial recognition
+(Kostka, Steinacker, & Meckel, 2021). Moreover, Chinese responses are more
+likely to be technology optimists concerned with the convenience technology
+brings to their lives (Wang & Zhang, 2019).
+The use of facial recognition in China and the United States has protected in-
+dividuals' privacy for the public response. There has been a "First case of face
+recognition"<sup>2</sup> in China [In October 2019, Guo Bing, an associate professor at the
+Zhejiang Sci-Tech University in China, filed a lawsuit against the Hangzhou
+Wildlife World Co., Ltd. over the company's forced face painting. The Fuyang
+District People's Court in Hangzhou has officially accepted the case; the case
+became the "First face recognition case" brought by Chinese consumers.], in
+which a citizen has resisted being forced to input face information. In April
+2020, Guo Bing, the plaintiff in China's first facial recognition case, received
+compensation of 1038 yuan, and Hangzhou Wildlife World Co. Ltd deleted Guo
+Bing's facial features and fingerprint identification information. San Francisco
+was the first city in the United States and the world to ban facial recognition. In
+May 2019, the Board of Supervisors of San Francisco, the US state of California,
+passed a Stop Secret Surveillance Ordinance. The decision bans the use of facial
+recognition technology by all government departments in the city, including po-
+<sup>2</sup>In October 2019, Guo Bing, an associate professor at the Zhejiang Sci-Tech University in China,
+filed a lawsuit against the Hangzhou Wildlife World Co., Ltd. over the company's forced face paint-
+ing. The Fuyang District People's Court in Hangzhou has officially accepted the case; the case be-
+came the "First face recognition case" brought by Chinese consumer.
+Open Journal of Social Sciences
+DOI: 10.4236/jss.2021.910036
+500
+
+--- END OF PAGE 3 ---
+
+--- START OF PAGE 4 ---
+
+L. L. Wang
+lice stations.
+Citizens in both countries disagree about face recognition, but the social
+background of the disagreement is different. The relationship between the police
+and the public and the social environment faced by ethnic minorities are differ-
+ent in China and the United States. Hence, citizens view face recognition diffe-
+rently in terms of discrimination and privacy. Due to the reports of police vi-
+olence in the United States, the public may feel revolt against the police officers'
+search for their information through face recognition, and the reduction of dis-
+crimination in the social background of diverse nationalities and ethnic groups
+is the reason for the widespread public resistance to face recognition in the
+United States (Xing, 2020). China's focus on collective interests, and the public's
+resistance to face recognition, is more personal than the civil disorder.
+So, should states have access to personal information in face recognition?
+The American public has resisted face recognition, but the public is more re-
+ceptive to the use of facial recognition by the central government than private
+companies, and so is China. The use of facial recognition for surveillance by law
+enforcement is not a matter of public concern but rather the convenience and
+increased security of face recognition applications (Kostka, Steinacker, & Meck-
+el, 2021). Biometric features in face recognition are not lost, transmitted, or sto-
+len. The use of biometric features requires a real user to access specific resources,
+which improves security (Zhang & Kang, 2019).
+The strengthening of state social monitoring can predict people's movements
+and can quickly deal with social emergencies. For example, the new crown
+pneumonia epidemic, for China, in a short time, the greatest efforts to mobilise
+national resources, the use of digital organisation, the use of QR codes, face rec-
+ognition to match personal information quickly, in order to organise the public's
+work, isolation, treatment and other issues. Moreover, the combination of face
+recognition and infrared temperature measurement technology can realize
+"Non-contact temperature measurement", which is widely used in epidemic
+prevention and control. Coupled with a shift in power from the highest levels of
+the national government to grassroots collaboration, China quickly took the lead
+in the spread of the epidemic.
+In addition to the national grasp of personal biological characteristics for pub-
+lic security, private enterprises' collection of face information can play a more
+commercial value. The intervention of state forces can organise the collection of
+face information and the wide range of applications with the highest efficiency.
+Compared with private enterprises, it also has a more potent authority.
+Whether it is the United States or China, facial recognition is to a certain ex-
+tent the lack of explicit use standards. Continuing improvements in facial recog-
+nition applications in China, the United States and other countries include es-
+tablishing and improving safety and accountability thresholds for face recogni-
+tion technology use, distinguishing between public and private sector spaces for
+face recognition and different focuses for public and private use. Simultaneously,
+DOI: 10.4236/jss.2021.910036
+Open Journal of Social Sciences
+501
+
+--- END OF PAGE 4 ---
+
+--- START OF PAGE 5 ---
+
+L. L. Wang
+the collection of face information is more powerful than the collection of general
+personal information. The improvement of the system can also improve the se-
+curity of technology application and the protection of public rights.
+3. Face Recognition and Commercial Applications
+The widespread use of face recognition includes the demands of government
+departments for public safety, commercial organisations for efficiency and cost
+reduction, and artificial intelligence technology companies for business growth.
+Some reporters pointed out that after the big companies open-source some algo-
+rithms, the threshold of face recognition technology has been dramatically re-
+duced. Many companies with modest technological capabilities have acquired
+the ability to use face recognition. Still, the collection and storage of facial data
+can not guarantee a certain degree of security. These companies often collect and
+store basic facial information directly, ignoring security concerns.
+At the beginning of the article, I mentioned that my grandmother's neigh-
+bourhood had a facial recognition system for entry. How to store and use the
+face photos of residents after collection and whether there will be information
+security problems deserve our attention. The neighbourhood developers and the
+property owners how to keep the collected personal information confidential
+and manage also need clear instructions. In addition to the need to maintain
+public safety, face recognition technology often makes face data obtained by or-
+ganisations or systems without any qualifications or even forced to use. As a re-
+sult, the criminal problems exposed by the misuse of face data are likely to out-
+weigh the need for public safety.
+The relationship between business companies and the government is also dif-
+ferent in China and the United States. There are different criteria between busi-
+ness companies and the government on whether facial recognition should be
+used. Public Safety Protection seems to be a criterion to consider when using
+face recognition.
+The databases in the United States are not interconnected, and government
+enforcement will require data from large companies in partnership with many
+technology companies. For example, in June 2020, Amazon banned police from
+using its widely used facial recognition software, rekognition, and Microsoft, un-
+til the country perfected its legal system. In contrast to China, the information
+obtained by the service providers belongs to China. In addition to commercial
+use, the content of the service providers platforms also needs to be managed by
+the state, and the international export of data also needs to be agreed upon and
+managed by the state (Xiao, 2019).
+In China, the state holds the majority of the biometric information gained
+through face recognition. The facial recognition technology of the service pro-
+viders comes from the popularity of technology companies and national tech-
+nology rather than the uniqueness of the technology. Service providers in the
+United States have the advantage of patenting their technology and self-control
+Open Journal of Social Sciences
+DOI: 10.4236/jss.2021.910036
+502
+
+--- END OF PAGE 5 ---
+
+--- START OF PAGE 6 ---
+
+L. L. Wang
+of their technology and database, forming a mode of dialogue with the govern-
+ment and restricting the use of the US government to some extent. So, China can
+carry out international protection of data from the national level, limiting the
+information leakage caused by data sharing of international cooperation be-
+tween commercial companies to some extent. However, to a certain extent, it
+will also restrict the autonomy of enterprises. The power of the United States has
+been decentralised under mutual constraints, which can better provide the social
+subjects of the pursuit of rights channels and maximise the strength of different
+subjects.
+It seems that, under the influence of face recognition, different relationships
+between different countries and commercial companies are diverging in the
+world. Moreover, commercial companies' possible disclosure of personal privacy
+is also a common problem faced by China and the United States. Therefore, the
+regulations on facial recognition of commercial products need further standar-
+dise the use range and standards of face recognition.
+In addition, different countries and commercial companies in the face recog-
+nition and other artificial intelligence technology, the impact of social structure,
+we also need to think about how. The long-term leadership of the state over fa-
+cial recognition and its data in commercial companies, and the partnership be-
+tween the state and commercial companies in facial recognition projects, will
+bring about changes in society over the long term and a power shift. The appli-
+cation of face recognition in different countries also reflects the interaction be-
+tween technology, government and enterprise.
+4. The Cultivation of Rational Individuals
+After the text edit has been completed, the paper is ready for the template. Dup-
+licate the template file by using the Save As command, and use the naming con-
+vention prescribed by your journal for the name of your paper. In this newly
+created file, highlight all of the contents and import your prepared text file. You
+are now ready to style your paper.
+The combination of artificial intelligence, such as face recognition, law en-
+forcement and supervision, can be seen as a way to reshape the government's
+power. But whether in the United States or China, the public is responding in
+different ways to questions about the privacy and freedom of facial recognition.
+For example, San Francisco in the United States first banned the use of face rec-
+ognition. China has also emerged "Face recognition of the first case," a legal way
+to oppose the admission of visitors to the scenic zoo spot mandatory facial in-
+formation.
+Intense state supervision or law enforcement cannot prevent conflict between
+the law enforcement departments and the privacy issues involved in face recog-
+nition. Both China and the United States are making efforts to perfect the legal
+system of face recognition. With the improvement of education, the deepening
+of global rational thinking, and the strengthening of individual self-consciousness,
+Open Journal of Social Sciences
+DOI: 10.4236/jss.2021.910036
+503
+
+--- END OF PAGE 6 ---
+
+--- START OF PAGE 7 ---
+
+L. L. Wang
+the public's consciousness is also promoting the policy change and response of
+the state power organisation.
+We should pay attention to the range of use of facial recognition, legal norms
+and the differences between countries. We should also be aware that artificial
+intelligence such as face recognition is reshaping the way society regulates and
+the scope of individual privacy. Furthermore, as a means of technological
+change, artificial intelligence has brought about changes in lifestyle and changes
+in the economy, productivity, and social structure (Li, 2020).
+The intelligence degree of human society is constantly deepening, and the
+technical foundation of artificial intelligence embedded in our society is also
+constantly being consolidated. Increased security from technology also seems to
+increase public acceptance of technologies such as face recognition (Kostka,
+Steinacker, & Meckel, 2021). The improvement of the degree of acceptance, the
+convenience of technology, the ease of bringing people to the pursuit of tech-
+nology and optimistic use, and ignoring its hidden dangers. The Center for
+Science and technology research at Tsinghua University points out that people's
+attitudes toward artificial intelligence are becoming more rational. People have
+gone from fanaticism to reflection on the potential pitfalls of artificial intelligence.
+According to this article, the improvement of digital social regulation in Chi-
+na does not represent the road to digital centralisation, nor can it be regarded as
+unique to China. In addition to the problems that facial recognition technology
+brings in different fields. It is more important to judge whether a series of
+changes are brought about by the new technology form or the transformation of
+the existing problems in society, or the amplification and presentation of preju-
+dice. The Chinese government uses technologies such as face recognition for so-
+cial supervision, showing that the power is in the hands of the government and
+human beings. On the other hand, when the US government uses technologies
+such as face recognition for social governance, technology is more instrumental.
+We now belong to the artificial intelligence aided human dictatorship (Zhe,
+2018). People are faced with how to play the technological advantages, maintain
+human independence, and the technical risk pre-investigation and solution.
+Researchers in the digital age need to think about how to face and defuse
+technological risks so that artificial intelligence can genuinely become good
+technology, which requires both development and governance and promotion
+and limitation (Li, 2020). China and the United States use face recognition in
+different ways. The operation mode of social supervision can be used for refer-
+ence by each other. However, the political, social and technical reasons behind
+the face recognition information need to be explored and analysed; it makes the
+world more rational to use face recognition.
+But when the use of technology beyond human control, the power of tech-
+nology will be greater than human control, that is, artificial intelligence free
+from human supervision, into the stage of autonomous evolution (Wang, 2001),
+coping with technological autonomy is a global topic. So individual conscious-
+Open Journal of Social Sciences
+DOI: 10.4236/jss.2021.910036
+504
+
+--- END OF PAGE 7 ---
+
+--- START OF PAGE 8 ---
+
+L. L. Wang
+ness should be in line with the topic of the times. The enhancement of individual
+rational thinking can promote different countries and the world to understand
+technology and the promotion society more perfect system and a series of social
+topic development.
+In the use of face recognition, many scholars study the public acceptance and
+investigate the factors that influence the public perception of face recognition.
+The education level is not always significant. The correlation between public
+education and acceptance is still worth exploring. The increase in individual
+education plays a vital role in an individual's judgment of his or her environ-
+ment and understanding of the risks. The general audience should be aware of
+the cost and risk in the process of using face recognition. When the individual's
+rational consciousness is improved, it can complement the national supervision,
+and the individual has an independent judgment for the national supervision.
+The role of state supervision is not only to predict the behaviour of citizens but
+also to protect the collective of people with different levels of education.
+5. Conclusion
+In the application of face recognition in China and the United States, there are
+public responses based on the protection of individual privacy. Citizens of the
+two countries have different opinions on face recognition. However, the social
+background is diverse, so the citizens emphasise the discrimination and privacy
+of face recognition. While analysing the problems that face recognition technol-
+ogy may bring, it is more important to judge whether a series of changes result
+from new technological forms or the amplification and transformation of pre-
+conceptions that already exist in society.
+China and the United States have different relationships with commercial fa-
+cial recognition programs. China has long been a leader in face recognition and
+its data. The United States has a partnership with commercial facial recognition
+programs. The application of face recognition in different countries also reflects
+the interaction between technology, government and enterprise.
+The macro interactions between technology, state and business shape the
+structure of society, and each individual in society at the micro-level needs to
+understand and be aware of the costs and risks involved in using face recogni-
+tion. An increase in personal self-awareness helps to counter the potential tech-
+nological cage.
+<b>Conflicts of Interest</b>
+The author declares no conflicts of interest regarding the publication of this
+paper.
+References
+He, Z. (2018). Will Artificial Intelligence Form a New Autocracy?: History and Future of
+Human Politics. Journal of Party School of CPC Tianjin Municipal Committee, 6, 3-10.
+<b>Open Journal of Social Sciences</b>
+DOI: 10.4236/jss.2021.910036
+505
+
+--- END OF PAGE 8 ---
+
+--- START OF PAGE 9 ---
+
+L. L. Wang
+Kostka, G., Steinacker, L., & Meckel, M. (2021). Between Security and Convenience: Fa-
+cial Recognition Technology in the Eyes of Citizens in China, Germany, the United
+Kingdom, and the United States. Public Understanding of Science (Bristol, England),
+30, 671-690. https://doi.org/10.1177/09636625211001555
+Li, H. (2020). Sociological Considerations Caused by the Fusion of Digital Humanism
+and Artificial Intelligence. Internet World, 11, 18-23.
+Liu, Y., Yan, W., & Hu, B. (2021). Resistance to Facial Recognition Payment in China:
+The Influence of Privacy-Related Factors. Telecommunications Policy, 45.
+https://doi.org/10.1016/j.telpol.2021.102155
+Lopez, A. E. (2020). The Use of Facial Recognition Technology by the United States and
+China, and How It Affects Civil Liberties. ProQuest Dissertations Publishing.
+Steinacker, L., Meckel, M., Kostka, G., & Borth, D. (2020). Facial Recognition: A
+Cross-National Survey on Public Acceptance, Privacy, and Discrimination.
+Wang, D. L. (2001). Unsupervised Learning: Foundations of Neural Computation: A Re-
+view. The AI Magazine, 22, 101.
+Wang, Z., & Zhang, L. (2019). Security, Privacy and Civil Liberties: Reflections on the
+Technical Security of Facial Recognition Systems in Public Places. Journal of Party
+School of Shengli Oilfield, 32, 74-76.
+https://doi.org/10.13600/j.cnki.jpsslof.issn.1009-4326.2019.01.016
+Xiao, Q. (2019). The Road to Digital Unfreedom: President Xi's Surveillance State. Jour-
+nal of Democracy, 30, 53-67. https://doi.org/10.1353/jod.2019.0004
+Xing, H. Q. (2020). Legal Regulation of Face Recognition. Comparative Study Method, 5,
+51-63.
+Zhang, W. K., & Kang, M. J. (2019). Factors Affecting the Use of Facial-Recognition
+Payment: An Example of Chinese Consumers. IEEE Access, 7, 154360-154374.
+https://doi.org/10.1109/ACCESS.2019.2927705
+Zhao, W., Chellappa, R., Phillips, P., & Rosenfeld, A. (2003). Face Recognition: A Litera-
+ture Survey. ACM Computing Surveys, 35, 399-458.
+https://doi.org/10.1145/954339.954342
+DOI: 10.4236/jss.2021.910036
+Open Journal of Social Sciences
+506
+
+--- END OF PAGE 9 ---

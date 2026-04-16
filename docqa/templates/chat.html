@@ -59,7 +59,7 @@
       margin-bottom: 2rem;
     }
     .nav-shell h1 {
-      font-size: 1.5rem;
+      font-size: 2rem;
       font-weight: 700;
       color: #ffffff;
       display: inline-flex;
@@ -86,7 +86,7 @@
     }
     .sidebar-item:hover {
       transform: translateY(-1px);
-      border-color: rgba(56, 189, 248, 0.35);
+      border-color: #06b6d1;
       box-shadow: 0 14px 35px rgba(5, 21, 47, 0.16);
     }
     .sidebar-item.active {
@@ -254,6 +254,10 @@
       background: rgba(255,255,255,0.8);
       border: 1px solid rgba(0,0,0,0.1);
     }
+    body.light .sidebar-item:hover {
+      border-color: #000000;
+      box-shadow: none;
+    }
     body.light .chat-user {
       background: rgba(56, 189, 248, 0.3);
       color: #1e293b;
@@ -306,13 +310,32 @@
     body.light .chat-scroll {
       scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
     }
+    .logo-icon {
+      color: #06b6d1; /* cyan for dark mode */
+    }
+    body.light .logo-icon {
+      color: #1e40af; /* dark blue for light mode */
+    }
   </style>
 </head>
 <body>
   <div class="page-shell">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="nav-shell">
-        <h1><i class="fa-solid fa-shield-halved text-cyan-300"></i> CP office Smart document analysis</h1>
+        <h1>
+          <svg class="h-10 w-10 logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 3h8l4 4v11.5a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 17V4.5A1.5 1.5 0 0 1 5 3z" />
+            <path d="M13 3v4h4" />
+            <path d="M7 9h5" />
+            <path d="M7 11h4" />
+            <circle cx="15.5" cy="15.5" r="3" />
+            <line x1="17.3" y1="17.3" x2="19" y2="19" />
+            <circle cx="14.6" cy="14.6" r="0.45" />
+            <circle cx="15.8" cy="14.9" r="0.45" />
+            <circle cx="15.2" cy="16" r="0.45" />
+          </svg>
+          CP Office Smart Document Analysis
+        </h1>
         <div class="flex flex-wrap items-center gap-6 text-sm">
           <a href="/" class="flex items-center gap-2"><i class="fa-solid fa-upload"></i> Upload Document</a>
           <a href="/chat/" class="flex items-center gap-2"><i class="fa-solid fa-comments"></i> Chat with Documents</a>
@@ -330,8 +353,8 @@
         <aside class="glass-panel rounded-[32px] p-6 h-[calc(100vh-124px)] overflow-y-auto">
           <div class="flex items-center justify-between mb-6">
             <div>
-              <p class="text-sm uppercase tracking-[0.3em] text-cyan-300">Saved Documents</p>
-              <h2 class="text-2xl font-semibold text-white mt-3">Choose a document</h2>
+              <p id="sidebar-title" class="text-sm uppercase tracking-[0.3em] text-cyan-300">Saved Documents</p>
+              <h2 id="sidebar-subtitle" class="text-2xl font-semibold text-white mt-3">Choose a document</h2>
             </div>
           </div>
           <div id="docs-sidebar" class="space-y-3"></div>
@@ -370,6 +393,28 @@
     let currentDocument = null;
     let chatHistory = [];
 
+    function showModal(title, message, buttons = []) {
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-message').textContent = message;
+      const buttonsContainer = document.getElementById('modal-buttons');
+      buttonsContainer.innerHTML = '';
+      buttons.forEach(btn => {
+        const button = document.createElement('button');
+        button.textContent = btn.text;
+        button.className = btn.class || 'glass-button px-6 py-2 rounded-lg';
+        button.onclick = () => {
+          hideModal();
+          if (btn.onClick) btn.onClick();
+        };
+        buttonsContainer.appendChild(button);
+      });
+      document.getElementById('custom-modal').classList.remove('hidden');
+    }
+
+    function hideModal() {
+      document.getElementById('custom-modal').classList.add('hidden');
+    }
+
     async function loadDocuments() {
       const res = await fetch('/api/documents/');
       const data = await res.json();
@@ -378,14 +423,21 @@
       const urlParams = new URLSearchParams(window.location.search);
       const selectedDoc = urlParams.get('doc');
       
+      // Update sidebar titles based on mode
+      if (selectedDoc) {
+        document.getElementById('sidebar-title').textContent = 'Uploaded Document';
+        document.getElementById('sidebar-subtitle').style.display = 'none';
+      } else {
+        document.getElementById('sidebar-title').textContent = 'Uploaded Documents';
+        document.getElementById('sidebar-subtitle').textContent = 'Choose a document';
+        document.getElementById('sidebar-subtitle').style.display = 'block';
+      }
+      
       let documentsToShow = data.documents;
       
       // If a specific document is requested, filter to show only that one
       if (selectedDoc) {
         documentsToShow = data.documents.filter(doc => doc.original_filename === selectedDoc);
-        if (documentsToShow.length > 0 && !currentDocument) {
-          currentDocument = selectedDoc;
-        }
       }
       
       const container = document.getElementById('docs-sidebar');
@@ -491,26 +543,30 @@
 
     async function deleteDocument(originalName, event) {
       event.stopPropagation();
-      if (!confirm('Are you sure you want to delete this document?')) return;
+      
+      showModal('Confirm Deletion', `Are you sure you want to delete "${originalName}"?`, [
+        { text: 'Cancel' },
+        { text: 'Delete', class: 'glass-button px-6 py-2 rounded-lg bg-red-500/20 border-red-400/30', onClick: async () => {
+          const res = await fetch('/api/documents/delete/', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ document_name: originalName })
+          });
 
-      const res = await fetch('/api/documents/delete/', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ document_name: originalName })
-      });
-
-      const data = await res.json();
-      if (data.status === 'success') {
-        if (currentDocument === originalName) {
-          currentDocument = null;
-          document.getElementById('chat-header').classList.add('hidden');
-          document.getElementById('chat-messages').innerHTML = '';
-        }
-        loadDocuments();
-        alert('Document deleted successfully!');
-      } else {
-        alert('Error deleting document: ' + data.message);
-      }
+          const data = await res.json();
+          if (data.status === 'success') {
+            if (currentDocument === originalName) {
+              currentDocument = null;
+              document.getElementById('chat-header').classList.add('hidden');
+              document.getElementById('chat-messages').innerHTML = '';
+            }
+            loadDocuments();
+            showModal('Document Deleted', `"${originalName}" has been deleted successfully.`, [{ text: 'OK' }]);
+          } else {
+            showModal('Deletion Failed', 'Error deleting document: ' + data.message, [{ text: 'OK' }]);
+          }
+        }}
+      ]);
     }
 
     const themeToggleInput = document.getElementById('theme-toggle-input');
@@ -543,5 +599,15 @@
     loadTheme();
     loadDocuments();
   </script>
+
+  <!-- Custom Modal -->
+  <div id="custom-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+    <div class="glass-panel rounded-[24px] p-8 max-w-md w-full mx-4 text-center">
+      <h3 id="modal-title" class="text-xl font-semibold text-white mb-4"></h3>
+      <p id="modal-message" class="text-slate-300 mb-6"></p>
+      <div id="modal-buttons" class="flex gap-3 justify-center"></div>
+    </div>
+  </div>
+
 </body>
 </html>

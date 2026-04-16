@@ -1,0 +1,90 @@
+
+--- START OF PAGE 1 ---
+
+TWO ELEPHANTS TECHNOLOGIES LLP
+One Promise: Strength Care Honesty
+Al Smart Surveillance System – Requirement Clarification
+Questions
+REQUIREMENTS GATHERING REPORT
+Smart Surveillance System
+Solapur Police Commissionerate
+Submitted by: Team - TEJ | Date: 1 April, 2026
+Q. No
+Question
+Why This Is Important
+What type of cameras are currently in use?
+Helps determine compatibility with AI
+1
+(CCTV/IP cameras, brand, resolution, etc.)
+models, video quality, and whether
+upgrades are needed for accurate
+detection.
+2
+What are the hardware specifications of the
+Ensures the system can handle AI
+existing system? (Server, GPU, storage, etc.)
+processing workloads and identifies if
+additional hardware or optimization is
+required.
+Understanding the workflow helps
+3
+How does the current surveillance system
+work? (Kindly explain the existing system
+integrate AI features smoothly without
+disrupting existing operations.
+workflow)
+Are there any reference systems or examples
+Provides clarity on expectations, desired
+4
+to be followed?
+features, and benchmarks for system
+performance and design.
+Are any IoT devices (like fire/smoke sensors)
+5
+Helps integrate multi-sensor data for
+already in place? Kindly list them along with
+better decision-making and enhances
+their configuration.
+system capabilities.
+Existing data can significantly improve
+Is any existing dataset (images/videos)
+6
+available for training machine learning
+model accuracy and reduce training time
+models?
+and cost.
+Is the requirement for all features on all
+Allows customization and efficient
+7
+cameras, or different features for different
+resource usage by applying only necessary
+features to specific cameras.
+cameras?
+What exactly is expected from the system to
+Helps determine the exact output to be
+8
+do in Mask detection and Queue detection
+delivered
+kindly explain in detail.
++91- 9923173456
+support@twoelephants.org
+Texas, USA
++91-7709955664
+www.twoelephants.org
+Solapur, INDIA
+
+--- END OF PAGE 1 ---
+
+--- START OF PAGE 2 ---
+
+TWO ELEPHANTS TECHNOLOGIES LLP
+One Promise: Strength Care Honesty
++91- 9923173456
+support@twoelephants.org<br>www.twoelephants.org
+Texas, USA<br>Solapur, INDIA
+<math>\Diamond</math>
+•
+<b>₹</b>
++91- 7709955664
+
+--- END OF PAGE 2 ---

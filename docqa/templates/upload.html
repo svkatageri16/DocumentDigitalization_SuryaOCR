@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CP office Smart document analysis</title>
+  <title>CP Office Smart Document Analysis</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
@@ -225,7 +225,7 @@
       margin-bottom: 2rem;
     }
     .nav-shell h1 {
-      font-size: 1.5rem;
+      font-size: 2rem;
       font-weight: 700;
       color: #ffffff;
       display: inline-flex;
@@ -248,11 +248,12 @@
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
+      margin-top: 0.75rem;
       transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     }
     .doc-item:hover {
       transform: translateY(-1px);
-      border-color: rgba(56, 189, 248, 0.35);
+      border-color: #06b6d1;
       box-shadow: 0 18px 36px rgba(4, 16, 41, 0.24);
     }
     .doc-item-title {
@@ -321,6 +322,10 @@
       background: rgba(255,255,255,0.8);
       border: 1px solid rgba(0,0,0,0.1);
     }
+    body.light .doc-item:hover {
+      border-color: #000000;
+      box-shadow: none;
+    }
     body.light .drop-panel {
       background: rgba(255,255,255,0.8);
       border: 1px solid rgba(0,0,0,0.1);
@@ -363,16 +368,23 @@
     body.light #docs-list {
       scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
     }
+    /* Modal light mode styles */
+    body.light #modal-title {
+      color: #0f172a !important; /* Dark color for title in light mode */
+    }
+    body.light #modal-message {
+      color: #1e293b !important; /* Dark color for message in light mode */
+    }
   </style>
 </head>
 <body>
   <div class="page-shell">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="nav-shell">
-        <h1>CP office Smart document analysis</h1>
+        <h1>CP Office Smart Document Analysis</h1>
         <div class="flex flex-wrap items-center gap-6 text-sm">
           <a href="/" class="flex items-center gap-2"><i class="fa-solid fa-upload"></i> Upload Document</a>
-          <a href="/chat/" class="flex items-center gap-2"><i class="fa-solid fa-comments"></i> Chat with Documents</a>
+          <a href="/chat/" class="flex items-center gap-2"><i class="fa-solid fa-comments"></i> Chat With Documents</a>
           <div class="theme-switch-wrap ml-4">
             <label class="theme-switch">
               <input id="theme-toggle-input" type="checkbox" class="theme-switch-input">
@@ -440,6 +452,30 @@
   </div>
 
   <script>
+    let isUploading = false;
+
+    function showModal(title, message, buttons = []) {
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-message').textContent = message;
+      const buttonsContainer = document.getElementById('modal-buttons');
+      buttonsContainer.innerHTML = '';
+      buttons.forEach(btn => {
+        const button = document.createElement('button');
+        button.textContent = btn.text;
+        button.className = btn.class || 'glass-button px-6 py-2 rounded-lg';
+        button.onclick = () => {
+          hideModal();
+          if (btn.onClick) btn.onClick();
+        };
+        buttonsContainer.appendChild(button);
+      });
+      document.getElementById('custom-modal').classList.remove('hidden');
+    }
+
+    function hideModal() {
+      document.getElementById('custom-modal').classList.add('hidden');
+    }
+
     async function loadProcessedDocs() {
       const res = await fetch('/api/documents/');
       const data = await res.json();
@@ -462,11 +498,21 @@
     loadProcessedDocs();
 
     async function uploadFile(file) {
+      if (isUploading) return; // Prevent multiple uploads
+      isUploading = true;
+      
+      // Disable upload elements
+      const dropzone = document.getElementById('dropzone');
+      const fileInput = document.getElementById('file-input');
+      const processBtn = document.getElementById('process-btn');
+      dropzone.style.pointerEvents = 'none';
+      dropzone.style.opacity = '0.5';
+      fileInput.disabled = true;
+      processBtn.disabled = true;
+      
       const formData = new FormData();
       formData.append('file', file);
-      const processBtn = document.getElementById('process-btn');
       const btnText = document.getElementById('btn-text');
-      processBtn.disabled = true;
       btnText.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Processing...`;
       startUploadProgress();
 
@@ -474,14 +520,20 @@
       const data = await res.json();
       if (data.status === 'success') {
         finishUploadProgress(true);
-        alert(`:white_check_mark: ${data.filename} processed successfully!`);
+        showModal('Upload Successful', `${data.filename} processed successfully!`, [{ text: 'OK' }]);
         loadProcessedDocs();
       } else {
         finishUploadProgress(false);
-        alert(data.message);
+        showModal('Upload Failed', data.message, [{ text: 'OK' }]);
       }
       btnText.innerHTML = `<i class="fa-solid fa-cogs"></i> Process with Surya OCR`;
+      
+      // Re-enable upload elements
+      dropzone.style.pointerEvents = '';
+      dropzone.style.opacity = '';
+      fileInput.disabled = false;
       processBtn.disabled = false;
+      isUploading = false;
     }
     function startProcessing() {
       const input = document.getElementById('file-input');
@@ -550,22 +602,36 @@
 
     async function deleteDocument(originalName, event) {
       event.stopPropagation();
-      if (!confirm('Are you sure you want to delete this document?')) return;
+      
+      showModal('Confirm Deletion', `Are you sure you want to delete "${originalName}"?`, [
+        { text: 'Cancel' },
+        { text: 'Delete', class: 'glass-button px-6 py-2 rounded-lg bg-red-500/20 border-red-400/30', onClick: async () => {
+          const res = await fetch('/api/documents/delete/', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ document_name: originalName })
+          });
 
-      const res = await fetch('/api/documents/delete/', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ document_name: originalName })
-      });
-
-      const data = await res.json();
-      if (data.status === 'success') {
-        loadProcessedDocs();
-        alert('Document deleted successfully!');
-      } else {
-        alert('Error deleting document: ' + data.message);
-      }
+          const data = await res.json();
+          if (data.status === 'success') {
+            loadProcessedDocs();
+            showModal('Document Deleted', `"${originalName}" has been deleted successfully.`, [{ text: 'OK' }]);
+          } else {
+            showModal('Deletion Failed', 'Error deleting document: ' + data.message, [{ text: 'OK' }]);
+          }
+        }}
+      ]);
     }
   </script>
+
+  <!-- Custom Modal -->
+  <div id="custom-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+    <div class="glass-panel rounded-[24px] p-8 max-w-md w-full mx-4 text-center">
+      <h3 id="modal-title" class="text-xl font-semibold text-white mb-4"></h3>
+      <p id="modal-message" class="text-slate-300 mb-6"></p>
+      <div id="modal-buttons" class="flex gap-3 justify-center"></div>
+    </div>
+  </div>
+
 </body>
 </html>

@@ -1,0 +1,537 @@
+
+--- START OF PAGE 1 ---
+
+A Major Project Synopsis (Review-1)
+On
+NyayaSahayak: An AI based legal document
+analysis and summarization tool with assistance
+<b>Submitted by</b>
+1. Shravani Pasnur - 29
+2. Sohan Katageri - 25
+3. Anjali Waghmare– 69
+4. Akash Rathod- 32
+<b>Under Guidance of</b>
+Prof. G.N. Chanderki
+In partial fulfillment for the award of the degree of
+<b>Bachelor of Technology</b>
+IN
+<b>Artificial Intelligence & Data Science Engineering</b>
+या विक्र
+Pradnya Niketan Education Society, Pune.
+NAGESH KARAJAGI ORCHID COLLEGE OF
+<b>ENGINEERING & TECHNOLOGY</b>
+<b>SOLAPUR.</b>
+2025-2026
+Guide
+<b>DPAC Member</b>
+<b>HOD</b>
+Prof. G.N. Chanderki
+Dr. M.B. Patil
+
+--- END OF PAGE 1 ---
+
+--- START OF PAGE 2 ---
+
+<b>Abstract</b>
+The Indian legal system relies heavily on complex, dense English terminology (legalese)
+that acts as a significant barrier for the common citizen. In regions like Maharashtra,
+individuals often sign rent agreements, employment contracts, and loan documents
+without fully understanding the underlying terms due to a lack of vernacular accessibility
+and the high cost of legal consultation. Traditional AI models attempt to solve this via
+literal translation, which often fails to capture the true legal intent, while generic Large
+Language Models (LLMs) are prone to hallucinating non-existent case laws.
+This project proposes NyayaSahayak, an AI-powered vernacular legal document
+simplification and risk assessment system designed for the common man. The system
+utilizes a hybrid AI architecture. First, a locally fine-tuned BERT-based classification
+model acts as a "Risk Scorecard," analyzing extracted contract clauses to flag exploitative
+or non-standard terms (High, Medium, Safe). Second, it employs Retrieval-Augmented
+Generation (RAG) integrated with a vector database (ChromaDB) of verified Indian case
+laws to ensure factual, zero-hallucination precedent recommendations. Finally, a cloud-
+based generative LLM simplifies the legal intent and translates the insights into regional
+languages, specifically Marathi and Hindi. By automating compliance checks and
+bridging the language gap, NyayaSahayak democratizes access to legal intelligence,
+transforming complex contracts into actionable, easily understandable insights for non-
+technical users.
+
+--- END OF PAGE 2 ---
+
+--- START OF PAGE 3 ---
+
+Literature Review/Related work
+S.no
+<b>Author / Title</b>
+Methodology
+<b>Outcomes</b>
+Scope for
+Work
+of Paper
+0r
+Application /
+<b>Application</b>
+Title
+Jhana.ai
+AI paralegal using LLMs
+Excellent case law
+Purely B2B;
+1
+retrieval for
+to search Supreme/High
+assumes the user is
+(Application)
+Court databases for legal
+professionals; highly
+a lawyer. Scope
+accurate citations.
+exists to adapt
+arguments.
+similar retrieval
+for laymen.
+2
+Contract lifecycle
+Automates mass NDA
+SpotDraft /
+Focuses on
+management (CLM)
+MikeLegal
+and contract
+corporate drafting.
+using NLP for enterprise
+(Application)
+generation and review.
+Need a simplified
+legal teams.
+version for
+individual
+tenant/employment
+contracts.
+3
+WhatsApp-based
+Focuses only on
+Jugalbandi by
+High rural penetration;
+AI4Bharat
+chatbot using Bhashini
+answers queries in
+schemes, not legal
+APIs and LLMs for
+local languages via
+(Application)
+contract analysis.
+voice/text.
+Excellent UI
+government schemes.
+benchmark for
+vernacular tools.
+InLegalBERT (Paul
+4
+Pre-training a BERT
+Outperforms standard
+Can be used as the
+model specifically on a
+RoBERTa and
+foundational
+et al., 2022)
+massive corpus of
+LegalBERT on Indian
+embedding model
+Indian legal judgments.
+court data classification.
+for our RAG
+pipeline and risk
+classifier.
+
+--- END OF PAGE 3 ---
+
+--- START OF PAGE 4 ---
+
+5
+Will be utilized to
+Creating pairs of
+Provides a high-
+OpenNyAI (Aalap
+complex Indian legal
+quality instruction-
+train the generative
+Dataset)
+tuning dataset for
+model on how to
+texts and their simplified
+legal summarization.
+explain legal
+summaries.
+concepts simply.
+Web tool utilizing GPT
+Quickly simplifies
+Lacks Indian
+Legalese Decoder
+6
+standard US/UK
+(Application)
+APIs to translate legal
+context (e.g., Rent
+jargon into plain
+Control Acts) and
+contracts.
+English.
+regional language
+support.
+7
+KanoonGPT
+Conversational AI fine-
+It is a chatbot, not
+Good for general
+legal queries and
+(Application)
+tuned to answer
+a document
+educational purposes.
+questions regarding the
+analyzer. Cannot
+Indian Penal Code and
+upload PDFs to
+Constitution.
+assess specific
+contract risks.
+State-of-the-art literal
+Massive parallel
+8
+Samanantar
+Can be leveraged
+corpora for English-
+translation between
+to ensure the final
+<b>Dataset by</b>
+Indic language
+AI4Bharat (Ramesh
+English and languages
+generative output is
+translation.
+like Marathi/Hindi.
+et al., 2021)
+grammatically
+correct in Marathi.
+LayoutLMv3 for
+9
+Multimodal
+Superior extraction of
+Resolves the issue
+transformer utilizing
+text from complex
+<b>Document</b>
+of splitting legal
+clauses in half
+text, layout, and image
+PDFs (tables, bold
+<b>Understanding</b>
+features for parsing.
+(Huang et al., 2022)
+headers, signatures).
+during the
+chunking phase of
+text extraction.
+Essential for
+10
+<b>Tesseract OCR for</b>
+Optical Character
+Converts physical
+Recognition for
+court notices into
+<b>Indic Scripts</b>
+processing
+scanned images,
+digital text strings.
+government
+documents which
+specifically
+Devanagari.
+are often poorly
+scanned physical
+copies.
+Retrieval-
+Using Vector
+Prevents LLMs from
+Forms the core
+11
+architecture for
+<b>Databases</b>
+inventing fake
+Augmented
+(FAISS/ChromaDB) to
+citations (zero
+the "Similar Case
+<b>Generation for</b>
+ground LLM responses
+hallucination).
+Legal QA (General
+Suggestion"
+in factual documents.
+feature in this
+<b>Architecture</b>)
+project.
+
+--- END OF PAGE 4 ---
+
+--- START OF PAGE 5 ---
+
+Better cultural and
+12
+Foundational models
+Can be explored as
+Sarvam AI /
+an alternative
+<b>OpenHathi</b>
+trained specifically on
+contextual
+Hindi and Indian
+(Application/Mode
+backend LLM for
+understanding than
+base Llama or GPT
+the generative
+1)
+contexts.
+models.
+translation step.
+High precision in
+13
+<b>Automated Clause</b>
+<b>Using Support Vector</b>
+Needs to be adapted
+Machines (SVM) or
+detecting non-standard
+<b>Risk Classification</b>
+from corporate
+corporate clauses.
+NDAs to common
+BERT to classify
+(Various NLP
+contract clauses (e.g.,
+<b>B2C</b> documents
+Papers)
+NDA anomalies).
+(rent, loans) using
+custom training.
+<b>Bhashini API</b>
+National language
+14
+Highly accurate
+Future scope to
+translation mission
+(Govt. of India)
+voice-to-text in
+integrate voice-
+providing STT and TTS
+Marathi and Hindi.
+first interactions
+APIs.
+for users with low
+literacy.
+<b>Evaluating LLMs</b>
+Empirical study
+Proves that "out of the
+15
+Strongly justifies
+the need for the
+showing GPT/Claude
+box" LLMs are
+for Legal
+<b>Hallucinations</b>
+models fail at specific
+dangerous for legal
+RAG architecture
+(Dahl et al., 2024)
+legal citation tasks.
+and local
+advice.
+hardcoded risk
+thresholds.
+
+--- END OF PAGE 5 ---
+
+--- START OF PAGE 6 ---
+
+<b>Application Gaps and Objectives of the Proposed Project</b>
+<b>Application Gaps:</b>
+Gap 1: B2B Focus: Existing LegalTech tools (SpotDraft, Jhana) are built for lawyers and
+enterprises. There is no B2C tool that helps a common citizen understand an everyday contract
+(like a rent agreement) before signing it.
+Gap 2: The Hallucination Trap: General generative AIs (ChatGPT, Gemini) frequently invent
+fake court cases and citations when asked legal questions, making them dangerous for legal
+analysis.
+Gap 3: Literal vs. Legal Translation: Tools like Google Translate provide literal word-for-
+word translations, which fail to capture the actual legal intent or consequence of a clause in
+regional languages like Marathi.
+Gap 4: Lack of Actionable Risk Detection: Current summarizers just shorten the text; they do
+not proactively warn the user if a specific clause is illegal or highly exploitative compared to
+state laws.
+<b>Objectives:</b>
+<b>Objective 1:</b> To develop a user-friendly, B2C web application that accepts standard legal PDFs
+and explains them in simple terms, empowering non-experts.
+Objective 2: To implement a Retrieval-Augmented Generation (RAG) pipeline using
+ChromaDB to ensure the AI only answers based on verified, uploaded statutes and Kanoon
+judgments.
+Objective 3: To utilize context-aware prompt engineering to translate the legal consequence
+(ELI5 - Explain Like I'm 5) into Marathi/Hindi, rather than just translating the vocabulary.
+Objective 4: To train a custom local classification model (BERT-based) that acts as a "Risk
+Scorecard," automatically flagging clauses as Safe (Green), Medium Risk (Yellow), or High
+Risk (Red).
+
+--- END OF PAGE 6 ---
+
+--- START OF PAGE 7 ---
+
+<b>Proposed Methodology</b>
+<b>AI-Powered Legal Document Analysis System</b>
+<b>Upload Document</b>
+<b>User Input Layer</b>
+<b>Check Format</b>
+<b>PyMuPDF</b>
+<b>Data Processing</b>
+<b>Tesseract OCR</b>
+Layer
+<b>Semantic Chunking</b>
+<b>Custom BERT Classifier</b>
+<b>RAG Pipeline</b>
+<b>Al Analysis Layer</b>
+<b>AI-Powered Legal</b>
+<b>Document Analysis</b>
+ChromaDB
+<b>System</b>
+Cloud LLM
+<b>Generative Layer</b>
+<b>ELI5 Translation Prompt</b>
+<b>Risk Scorecard</b>
+Dashboard
+<b>Output Presentation</b>
+Marathi/Hindi Summary
+Layer
+Similar Precedent Cases
+Made with 🍃 Napkin
+
+--- END OF PAGE 7 ---
+
+--- START OF PAGE 8 ---
+
+Frontend & User Interface
+Built as a responsive web application (using React.js or Streamlit) designed for high
+<math>\bullet</math>
+accessibility and ease of use for non-technical users.
+The UI will feature a multi-lingual interface (specifically English, Marathi, and Hindi)
+<math>\bullet</math>
+to cater to the regional demographic.
+Includes a dynamic "Risk Scorecard" dashboard and a dual-panel view: one side
+•
+displaying the original uploaded PDF and the other showing the simplified vernacular
+summary.
+<b>Document Ingestion & Parsing Engine</b>
+Integration of PyMuPDF for high-speed, layout-aware text extraction from digital PDF
+•
+contracts to maintain structural integrity.
+Implementation of Tesseract OCR configured with Indic language packs to accurately
+•
+digitize scanned physical documents, stamped agreements, and court notices.
+A semantic chunking algorithm will split the extracted text logically by legal clauses
+•
+rather than arbitrary word counts, preserving the complete legal context of every
+sentence.
+<b>Custom AI Model (Clause Risk Classifier)</b>
+A locally fine-tuned, lightweight NLP model (based on DistilBERT or InLegalBERT)
+<math>\bullet</math>
+will be trained on a custom dataset of standard vs. exploitative legal clauses.
+This discriminative model will analyse every extracted clause and classify it into three
+•
+risk tiers: Safe (Green), Medium Risk (Yellow), or High Risk (Red).
+This fulfills the academic requirement of custom model training while maintaining low
+•
+hardware resource consumption.
+<b>Retrieval-Augmented Generation (RAG) Pipeline</b>
+A local vector database (ChromaDB) will be established and populated with a curated
+•
+dataset of landmark Indian court judgments (e.g., from Indian Kanoon).
+The system will convert the user's specific legal issue into vector embeddings using
+•
+HuggingFace models (all-MiniLM-L6-v2).
+It will mathematically retrieve the top 3 most similar past cases, grounding all precedent
+•
+suggestions in absolute legal fact and ensuring zero AI hallucination.
+
+--- END OF PAGE 8 ---
+
+--- START OF PAGE 9 ---
+
+<b>Generative Summarization & Translation (LLM Integration)</b>
+Secure backend integration with an advanced generative API (such as Groq/Llama-3 or
+<math>\bullet</math>
+Gemini) to handle complex reasoning and translation tasks.
+Utilizing strict "Chain-of-Thought" prompt engineering, the LLM will process only the
+<math>\bullet</math>
+High-Risk clauses identified by the local classifier.
+The API will translate the complex legal intent, not just literal words into "Explain Like
+<math>\bullet</math>
+I'm 5" (ELI5) bullet points in the user's selected regional language.
+<b>Backend Architecture & Database</b>
+A robust backend utilizing Python (FastAPI or Flask) will orchestrate the data flow
+<math>\bullet</math>
+between the OCR, the custom local model, the Vector DB, and the external LLM API.
+PostgreSQL will be utilized for secure user authentication, session management, and
+<math>\bullet</math>
+storing encrypted audit logs of analysed documents.
+
+--- END OF PAGE 9 ---
+
+--- START OF PAGE 10 ---
+
+<b>Expected Outcomes</b>
+1. <b>Functional B2C Prototype:</b> A fully operational web application (via Streamlit/FastAPI)
+where users can upload complex legal PDFs and receive analysis within seconds.
+2. High-Accuracy Risk Detection: The custom-trained BERT model will successfully classify
+standard vs. exploitative clauses with over 85% accuracy, displaying them in an intuitive
+visual scorecard.
+3. <b>Zero-Hallucination Querying:</b> The integration of the ChromaDB RAG pipeline will ensure
+that 100% of suggested precedent cases are real, verified judgments, completely eliminating
+generative hallucinations.
+4. Accurate Vernacular Simplification: Generation of simplified legal summaries in Marathi
+and Hindi that explain the intent of the law, rather than providing confusing literal
+translations.
+Reduced Legal Review Time: The system will reduce the time taken for a layman to
+5.
+understand a 20-page agreement from several hours (or requiring paid legal counsel) to under
+few minutes.
+
+--- END OF PAGE 10 ---
+
+--- START OF PAGE 11 ---
+
+References
+1. Jhana AI. (n.d.). AI Legal Assistant for Indian Lawyers. Retrieved from
+https://jhana.ai/
+2. SpotDraft. (n.d.). Contract Automation for Legal Teams. Retrieved from
+https://www.spotdraft.com/
+3. Jugalbandi. (n.d.). AI4Bharat WhatsApp Bot for Government Schemes. Retrieved
+from <a href="https://jugalbandi.ai/">https://jugalbandi.ai/</a>
+4. Paul, S., et al. (2022). InLegalBERT: A Pre-trained Language Model for Indian Legal
+Text. HuggingFace.
+5. OpenNyAI. (n.d.). Aalap Instruction Dataset for Indian Legal Texts. Retrieved from
+GitHub/HuggingFace.
+6. AI4Bharat. (2021). Samanantar: The Largest Publicly Available Parallel Corpora
+for Indic Languages.
+7. Huang, Y., et al. (2022). LayoutLMv3: Pre-training for Document AI with Unified
+Text and Image Masking. arXiv preprint.
+8. Tesseract OCR. (n.d.). Tesseract Open Source OCR Engine. Retrieved from
+https://github.com/tesseract-ocr/tesseract
+9. Chroma. (n.d.). ChromaDB: The AI-native open-source embedding database.
+Retrieved from <a href="https://www.trychroma.com/">https://www.trychroma.com/</a>
+10. Sarvam AI. (n.d.). OpenHathi: Foundational Models for Indian Languages.
+Retrieved from <a href="https://www.sarvam.ai/">https://www.sarvam.ai/</a>
+11. Dahl, M., et al. (2024). Large Legal Fictions: Profiling Legal Hallucinations in Large
+Language Models. arXiv preprint.
+12. Groq. (n.d.). LPU Inference Engine for Fast LLM Execution. Retrieved from
+https://groq.com/
+13. Bhashini. (n.d.). National Language Translation Mission API. Retrieved from
+https://bhashini.gov.in/
+14. Indian Kanoon. (n.d.). Search engine for Indian Law and Judgments. Retrieved from
+https://indiankanoon.org/
+15. Lewis, P., et al. (2020). Retrieval-Augmented Generation for Knowledge-Intensive
+NLP Tasks. NeurIPS.
+
+--- END OF PAGE 11 ---
