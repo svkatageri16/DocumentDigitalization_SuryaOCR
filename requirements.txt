@@ -1,0 +1,10 @@
+surya-ocr==0.17.1
+transformers==4.56.1
+sentence-transformers==2.7.0
+torch
+torchvision
+torchaudio
+chromadb
+pillow
+pymupdf
+ollama
