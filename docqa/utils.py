@@ -178,7 +178,7 @@ DOCUMENT CONTEXT:
 
         print(f"[DEBUG process_query] Sending request to Ollama with {len(messages)} messages")
         response = ollama.chat(
-            model='qwen3:8b',
+            model='llama3.2:3b',
             messages=messages
         )
         print(f"[DEBUG process_query] Ollama response received")

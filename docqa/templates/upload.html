@@ -6,6 +6,7 @@
   <title>CP Office Smart Document Analysis</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <script src="/static/translations.js"></script>
   <style>
     :root {
       color-scheme: dark;
@@ -174,6 +175,72 @@
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: rgba(148, 163, 184, 0.95);
+    }
+    /* Language Selector Styling */
+    #language-selector {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #ffffff;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    #language-selector:hover {
+      background: rgba(255,255,255,0.12);
+      border-color: rgba(255,255,255,0.3);
+    }
+    #language-selector:focus {
+      outline: none;
+      border-color: rgba(56, 189, 248, 0.5);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+    }
+    #language-selector option {
+      background: #1a1a2e;
+      color: #ffffff;
+      padding: 0.5rem;
+    }
+    body.light #language-selector {
+      background: rgba(0,0,0,0.08);
+      border: 1px solid rgba(0,0,0,0.15);
+      color: #1e293b;
+    }
+    body.light #language-selector:hover {
+      background: rgba(0,0,0,0.12);
+      border-color: rgba(0,0,0,0.25);
+    }
+    body.light #language-selector:focus {
+      border-color: #1d4ed8;
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
+    }
+    body.light #language-selector option {
+      background: #ffffff;
+      color: #1e293b;
+    }
+    body.light #language-selector option:checked {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+    body.light #language-selector {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231e293b' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 0.35rem center;
+      background-size: 1.25em 1.25em;
+      padding-right: 2rem;
+    }
+    #language-selector {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 0.35rem center;
+      background-size: 1.25em 1.25em;
+      padding-right: 2rem;
     }
     body.light .text-white { color: #0f172a !important; }
     body.light .text-slate-400 { color: #475569 !important; }
@@ -381,16 +448,21 @@
   <div class="page-shell">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="nav-shell">
-        <h1>CP Office Smart Document Analysis</h1>
+        <h1 data-i18n="title">CP Office Smart Document Analysis</h1>
         <div class="flex flex-wrap items-center gap-6 text-sm">
-          <a href="/" class="flex items-center gap-2"><i class="fa-solid fa-upload"></i> Upload Document</a>
-          <a href="/chat/" class="flex items-center gap-2"><i class="fa-solid fa-comments"></i> Chat With Documents</a>
+          <a href="/" class="flex items-center gap-2"><i class="fa-solid fa-upload"></i> <span data-i18n="uploadDoc">Upload Document</span></a>
+          <a href="/chat/" class="flex items-center gap-2"><i class="fa-solid fa-comments"></i> <span data-i18n="chatWithDocs">Chat With Documents</span></a>
+          <select id="language-selector">
+            <option value="en">English</option>
+            <option value="hi">हिंदी</option>
+            <option value="mr">मराठी</option>
+          </select>
           <div class="theme-switch-wrap ml-4">
             <label class="theme-switch">
               <input id="theme-toggle-input" type="checkbox" class="theme-switch-input">
               <span class="theme-switch-slider"></span>
             </label>
-            <div class="theme-label">Theme</div>
+            <div class="theme-label" data-i18n="theme">Theme</div>
           </div>
         </div>
       </div>
@@ -400,15 +472,15 @@
           <div class="flex flex-col gap-3">
             <div class="flex items-center gap-3 text-white">
               <i class="fa-solid fa-cloud-upload text-cyan-300"></i>
-              <h3 class="text-3xl font-semibold">Upload New Document</h3>
+              <h3 class="text-3xl font-semibold" data-i18n="uploadNewDoc">Upload New Document</h3>
             </div>
-            <p class="text-sm text-slate-400 max-w-xl">Drop your PDF or image here and begin smart processing with Surya OCR. The upload area is fully interactive and supports drag-and-drop.</p>
+            <p class="text-sm text-slate-400 max-w-xl" data-i18n="processPlaceholder">Drop your PDF or image here and begin smart processing with Surya OCR. The upload area is fully interactive and supports drag-and-drop.</p>
           </div>
 
           <div id="dropzone" class="drop-panel mt-10">
-            <p class="drop-title">Drop PDF or Image here</p>
-            <p class="drop-subtitle">or</p>
-            <label class="mt-8 inline-flex items-center justify-center rounded-full border border-white/15 px-10 py-3 text-white font-semibold cursor-pointer glass-button">
+            <p class="drop-title" data-i18n="dropHere">Drop PDF or Image here</p>
+            <p class="drop-subtitle" data-i18n="or">or</p>
+            <label class="mt-8 inline-flex items-center justify-center rounded-full border border-white/15 px-10 py-3 text-white font-semibold cursor-pointer glass-button" data-i18n="browseFiles">
               Browse Files
               <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png" class="hidden">
             </label>
@@ -424,10 +496,10 @@
         <section class="glass-panel rounded-[32px] p-10">
           <div class="flex items-center justify-between gap-4 mb-8">
             <div>
-              <p class="text-sm uppercase tracking-[0.3em] text-cyan-300">Processed Documents</p>
-              <h3 class="text-3xl font-semibold text-white mt-3">Your recent uploads</h3>
+              <p class="text-sm uppercase tracking-[0.3em] text-cyan-300" data-i18n="processedDocs">Processed Documents</p>
+              <h3 class="text-3xl font-semibold text-white mt-3" data-i18n="yourRecentUploads">Your recent uploads</h3>
             </div>
-            <span class="inline-flex items-center rounded-full bg-cyan-500/10 px-3 py-1 text-sm text-cyan-200">Live sync</span>
+            <span class="inline-flex items-center rounded-full bg-cyan-500/10 px-3 py-1 text-sm text-cyan-200" data-i18n="liveSync">Live sync</span>
           </div>
 
           <div id="docs-list" class="space-y-4">
@@ -445,7 +517,7 @@
       <div class="page-footer">
         <button onclick="startProcessing()" id="process-btn" class="glass-button inline-flex items-center justify-center gap-3 rounded-[28px] px-10 py-5 text-lg font-semibold tracking-wide uppercase">
           <i class="fa-solid fa-gear"></i>
-          <span id="btn-text">PROCESS NEW DOCUMENTS WITH SURYA OCR</span>
+          <span id="btn-text" data-i18n="processBtn">PROCESS NEW DOCUMENTS WITH SURYA OCR</span>
         </button>
       </div>
     </div>
@@ -513,20 +585,21 @@
       const formData = new FormData();
       formData.append('file', file);
       const btnText = document.getElementById('btn-text');
-      btnText.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Processing...`;
+      btnText.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> ${langManager.t('uploading')}`;
       startUploadProgress();
 
       const res = await fetch('/api/upload/', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.status === 'success') {
         finishUploadProgress(true);
-        showModal('Upload Successful', `${data.filename} processed successfully!`, [{ text: 'OK' }]);
+        showModal(langManager.t('uploadSuccess'), `${data.filename} ${langManager.t('uploadSuccessMsg')}`, [{ text: langManager.t('ok') }]);
         loadProcessedDocs();
       } else {
         finishUploadProgress(false);
-        showModal('Upload Failed', data.message, [{ text: 'OK' }]);
+        showModal(langManager.t('uploadFailed'), data.message, [{ text: langManager.t('ok') }]);
       }
-      btnText.innerHTML = `<i class="fa-solid fa-cogs"></i> Process with Surya OCR`;
+      btnText.textContent = '';
+      btnText.innerHTML = `<i class="fa-solid fa-cogs"></i> ${langManager.t('processBtn')}`;
       
       // Re-enable upload elements
       dropzone.style.pointerEvents = '';
@@ -546,7 +619,7 @@
       const label = document.getElementById('upload-progress-label');
       container.classList.remove('hidden');
       fill.style.width = '5%';
-      label.textContent = 'Uploading and extracting document...';
+      label.textContent = langManager.t('uploadProgress');
       if (window.uploadProgressInterval) clearInterval(window.uploadProgressInterval);
       window.uploadProgressInterval = setInterval(() => {
         const current = parseFloat(fill.style.width) || 0;
@@ -562,7 +635,7 @@
       const label = document.getElementById('upload-progress-label');
       if (window.uploadProgressInterval) clearInterval(window.uploadProgressInterval);
       fill.style.width = '100%';
-      label.textContent = success ? 'Extraction complete.' : 'Upload failed. Please retry.';
+      label.textContent = success ? langManager.t('extractionComplete') : langManager.t('extractionFailed');
       setTimeout(() => {
         if (success) {
           container.classList.add('hidden');
@@ -597,6 +670,19 @@
       const savedTheme = localStorage.getItem('suryaTheme');
       applyTheme(savedTheme === 'light' ? 'light' : 'dark');
     }
+
+    // Listen for language changes to update dynamic elements
+    window.addEventListener('languageChanged', () => {
+      const btnText = document.getElementById('btn-text');
+      if (btnText.querySelector('i')) {
+        // If there's an icon, preserve it
+        btnText.innerHTML = `<i class="fa-solid fa-cogs"></i> ${langManager.t('processBtn')}`;
+      } else {
+        btnText.textContent = langManager.t('processBtn');
+      }
+    });
+
+    loadTheme();
 
     loadTheme();
 

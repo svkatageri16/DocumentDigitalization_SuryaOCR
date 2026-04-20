@@ -6,6 +6,7 @@
   <title>CP office Smart document analysis</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <script src="/static/translations.js"></script>
   <style>
     :root { color-scheme: dark; }
     body {
@@ -210,6 +211,72 @@
       text-transform: uppercase;
       color: rgba(148, 163, 184, 0.95);
     }
+    /* Language Selector Styling */
+    #language-selector {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #ffffff;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    #language-selector:hover {
+      background: rgba(255,255,255,0.12);
+      border-color: rgba(255,255,255,0.3);
+    }
+    #language-selector:focus {
+      outline: none;
+      border-color: rgba(56, 189, 248, 0.5);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+    }
+    #language-selector option {
+      background: #1a1a2e;
+      color: #ffffff;
+      padding: 0.5rem;
+    }
+    body.light #language-selector {
+      background: rgba(0,0,0,0.08);
+      border: 1px solid rgba(0,0,0,0.15);
+      color: #1e293b;
+    }
+    body.light #language-selector:hover {
+      background: rgba(0,0,0,0.12);
+      border-color: rgba(0,0,0,0.25);
+    }
+    body.light #language-selector:focus {
+      border-color: #1d4ed8;
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
+    }
+    body.light #language-selector option {
+      background: #ffffff;
+      color: #1e293b;
+    }
+    body.light #language-selector option:checked {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+    body.light #language-selector {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231e293b' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 0.35rem center;
+      background-size: 1.25em 1.25em;
+      padding-right: 2rem;
+    }
+    #language-selector {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 0.35rem center;
+      background-size: 1.25em 1.25em;
+      padding-right: 2rem;
+    }
     body.light {
       background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
       color: #1e293b;
@@ -334,17 +401,22 @@
             <circle cx="15.8" cy="14.9" r="0.45" />
             <circle cx="15.2" cy="16" r="0.45" />
           </svg>
-          CP Office Smart Document Analysis
+          <span data-i18n="title">CP Office Smart Document Analysis</span>
         </h1>
         <div class="flex flex-wrap items-center gap-6 text-sm">
-          <a href="/" class="flex items-center gap-2"><i class="fa-solid fa-upload"></i> Upload Document</a>
-          <a href="/chat/" class="flex items-center gap-2"><i class="fa-solid fa-comments"></i> Chat with Documents</a>
+          <a href="/" class="flex items-center gap-2"><i class="fa-solid fa-upload"></i> <span data-i18n="uploadDoc">Upload Document</span></a>
+          <a href="/chat/" class="flex items-center gap-2"><i class="fa-solid fa-comments"></i> <span data-i18n="chatWithDocs">Chat with Documents</span></a>
+          <select id="language-selector">
+            <option value="en">English</option>
+            <option value="hi">हिंदी</option>
+            <option value="mr">मराठी</option>
+          </select>
           <div class="theme-switch-wrap ml-4">
             <label class="theme-switch">
               <input id="theme-toggle-input" type="checkbox" class="theme-switch-input">
               <span class="theme-switch-slider"></span>
             </label>
-            <div class="theme-label">Theme</div>
+            <div class="theme-label" data-i18n="theme">Theme</div>
           </div>
         </div>
       </div>
@@ -353,8 +425,8 @@
         <aside class="glass-panel rounded-[32px] p-6 h-[calc(100vh-124px)] overflow-y-auto">
           <div class="flex items-center justify-between mb-6">
             <div>
-              <p id="sidebar-title" class="text-sm uppercase tracking-[0.3em] text-cyan-300">Saved Documents</p>
-              <h2 id="sidebar-subtitle" class="text-2xl font-semibold text-white mt-3">Choose a document</h2>
+              <p id="sidebar-title" class="text-sm uppercase tracking-[0.3em] text-cyan-300" data-i18n="savedDocs">Saved Documents</p>
+              <h2 id="sidebar-subtitle" class="text-2xl font-semibold text-white mt-3" data-i18n="chooseDocument">Choose a document</h2>
             </div>
           </div>
           <div id="docs-sidebar" class="space-y-3"></div>
@@ -374,13 +446,14 @@
             <div class="chat-actions mt-6">
               <div class="flex gap-3">
                 <input id="user-input" type="text" placeholder="Ask anything about the selected document..."
+                       data-i18n-placeholder="askAboutDoc"
                        class="flex-1 bg-white/5 rounded-3xl px-6 py-4 text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400" />
                 <button onclick="sendMessage()" class="px-10 py-4 rounded-3xl button-primary text-white font-semibold">
                   <i class="fa-solid fa-paper-plane"></i>
                 </button>
               </div>
               <button onclick="clearChat()" class="clear-chat-btn text-sm text-slate-400 mt-3 hover:text-white">
-                <i class="fa-solid fa-trash"></i> Clear Chat
+                <i class="fa-solid fa-trash"></i> <span data-i18n="clearChatBtn">Clear Chat</span>
               </button>
             </div>
           </section>
@@ -425,11 +498,11 @@
       
       // Update sidebar titles based on mode
       if (selectedDoc) {
-        document.getElementById('sidebar-title').textContent = 'Uploaded Document';
+        document.getElementById('sidebar-title').textContent = langManager.t('uploadedDoc');
         document.getElementById('sidebar-subtitle').style.display = 'none';
       } else {
-        document.getElementById('sidebar-title').textContent = 'Uploaded Documents';
-        document.getElementById('sidebar-subtitle').textContent = 'Choose a document';
+        document.getElementById('sidebar-title').textContent = langManager.t('uploadedDocs');
+        document.getElementById('sidebar-subtitle').textContent = langManager.t('chooseDocument');
         document.getElementById('sidebar-subtitle').style.display = 'block';
       }
       
@@ -469,7 +542,7 @@
       document.getElementById('selected-doc-name').innerHTML = `<strong>${displayName}</strong>`;
       chatHistory = [];
       document.getElementById('chat-messages').innerHTML = '';
-      addMessage('ai', `Connected to document: <strong>${displayName}</strong><br>You can now ask questions.`);
+      addMessage('ai', `${langManager.t('connectedTo')} <strong>${displayName}</strong><br>${langManager.t('youCanAskQuestions')}`);
       if (!skipReload) {
         loadDocuments();
       }
@@ -520,7 +593,7 @@
         if (!res.ok || data.status === 'error') {
           const errorMsg = data.response || data.message || 'An error occurred while processing your query.';
           console.error('API Error:', errorMsg);
-          addMessage('ai', `❌ Error: ${errorMsg}`);
+          addMessage('ai', `❌ ${langManager.t('error')} ${errorMsg}`);
           return;
         }
         
@@ -529,7 +602,7 @@
         chatHistory.push({ role: 'assistant', content: answer });
       } catch (error) {
         console.error('Error in sendMessage:', error);
-        addMessage('ai', `❌ Network Error: ${error.message}`);
+        addMessage('ai', `❌ ${langManager.t('networkError')} ${error.message}`);
       }
     }
 
@@ -537,16 +610,16 @@
       chatHistory = [];
       document.getElementById('chat-messages').innerHTML = '';
       if (currentDocument) {
-        addMessage('ai', `Chat cleared.<br>Still connected to <strong>${document.getElementById('selected-doc-name').innerText}</strong>`);
+        addMessage('ai', `${langManager.t('chatCleared')}<br>${langManager.t('stillConnected')} <strong>${document.getElementById('selected-doc-name').innerText}</strong>`);
       }
     }
 
     async function deleteDocument(originalName, event) {
       event.stopPropagation();
       
-      showModal('Confirm Deletion', `Are you sure you want to delete "${originalName}"?`, [
-        { text: 'Cancel' },
-        { text: 'Delete', class: 'glass-button px-6 py-2 rounded-lg bg-red-500/20 border-red-400/30', onClick: async () => {
+      showModal(langManager.t('confirmDelete'), `${langManager.t('deleteConfirmMsg')} "${originalName}"?`, [
+        { text: langManager.t('cancel') },
+        { text: langManager.t('delete'), class: 'glass-button px-6 py-2 rounded-lg bg-red-500/20 border-red-400/30', onClick: async () => {
           const res = await fetch('/api/documents/delete/', {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
@@ -561,9 +634,9 @@
               document.getElementById('chat-messages').innerHTML = '';
             }
             loadDocuments();
-            showModal('Document Deleted', `"${originalName}" has been deleted successfully.`, [{ text: 'OK' }]);
+            showModal(langManager.t('docDeleted'), `"${originalName}" ${langManager.t('docDeletedMsg')}`, [{ text: langManager.t('ok') }]);
           } else {
-            showModal('Deletion Failed', 'Error deleting document: ' + data.message, [{ text: 'OK' }]);
+            showModal(langManager.t('deletionFailed'), `${langManager.t('deleteErrorMsg')} ${data.message}`, [{ text: langManager.t('ok') }]);
           }
         }}
       ]);
@@ -594,6 +667,16 @@
       if (e.key === 'Enter') {
         sendMessage();
       }
+    });
+
+    // Listen for language changes to update dynamic elements
+    window.addEventListener('languageChanged', () => {
+      // Update placeholder
+      const userInput = document.getElementById('user-input');
+      userInput.placeholder = langManager.t('askAboutDoc');
+      
+      // Reload documents to update labels
+      loadDocuments();
     });
 
     loadTheme();
